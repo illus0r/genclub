@@ -3131,6 +3131,6 @@ let sample = `
 `
 
 
-let rm = new RiTa.Markov(2)
+let rm = new RiTa.Markov(3)
 rm.addText(sample)
 p.innerHTML = rm.generate(10).join('<br>')
