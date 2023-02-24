@@ -1,4 +1,4 @@
-export let loadFileText = function(url) {
+export let loadText = function(url) {
 	var req = new XMLHttpRequest()
 	req.open("GET", url, false)
 	req.send(null)
