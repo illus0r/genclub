@@ -19,8 +19,8 @@ palette = palette.sort(_=>Math.random()-.5)
 console.log('palette:',palette)
 
 let gl = new Gl('canvas')
-gl.canvas.width = window.innerWidth
-gl.canvas.height = window.innerHeight
+gl.canvas.width = window.innerWidth/2
+gl.canvas.height = window.innerHeight/2
 
 let fsStr = loadText('./shader.frag')
 console.log(gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS));
