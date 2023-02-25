@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "oleg-scherbinin-project",
+  "private_key_id": "15aca17500cad9d9ede1ccb810f6d9ed0247d7b5",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC8vr5ezIXSRhMC\ntn4oN3YpeaJXIB09uQGP+TEgcD7/uvTnHVW4mzUmvyZhP86Nz1RIKbC830sS10BA\nGmABBtNBBY+5ARIDelcKu7E5+KhGsBfU+ef4UpGXqtfvntMh6YKhZjCA+Lu9Rjkb\n/7RKTbGGNcuatQtEK0CngTgQkZtNbrYdkXVD4JMJJxz0XAkbDGX46tqXvTdQH0oL\nD/+nSc9n3YoD4px5BBCHCwUHa2LboYhMTVSxwtn8Znf8nt/KeEow7DqU88ECw5dR\nBgyN0mEXvD4rnIN9htLTr/7xBwPeWJHXy0Z0VfLxxe3zT14Hvw3n6yyNdPOUIx0a\nzrRFhTEJAgMBAAECggEAMnVp7m0N/5uFPI3uJzFAkTD34gPvXU9m6AcOB6aKaRKh\no2G3x30S1hN3HruQrF+3n/0pRy0I5HYQMrL6ZHvfITxr4mEzYCOmPnPUGvPrhM5R\n6LmQttXYH2xogyJ6PlAvgJeRswEMK7sozF/tYonnwkICdw8cfnJzu/QzOVa75pST\nY6QX/j7ZZ5s9AcypRmexaOMYpTDtX2IsRkfHQ4h1AilPxPx+uq5hxj4SfOqLPj22\nkYPlst6lMubeSou2H0oOg+2GKULC70QNL2gu5cyZRbIo2/8hc8noydaMeAqot3qo\nkRtYlMqKIaKCcUC7GGJ0q2Fz1MlcoKAuVXVqS7vvSwKBgQDgd49t/LHfL9u2fENp\nHmTVBQm9J0QnOnHneMR0GVPM3Q7RSvsptFuCmh4QYxG3B/WxBfzwdvL5Lu3G/lmp\nnylaMaGxeJmwK45qnzvo3nLVw8DZuTLjj4nMO5yhGC5Ifv4StoPxyjoobsp2Jael\nKQQfp5nDm26/QlhsptEGTqqk3wKBgQDXQoatM2acb0HSIDLSe6/gI2VN6nwbv1SJ\nrCJ6n2OjmkEjOIgCrIEJ0k5Hd5orz8zDaDSvYT4P5ubWRo98ibXZTG6HlGaSAWnB\nLxtPEvNJdI8qHZ9aDxA9GxO4V38wbD4c+UJWkbwhiPET/vdfFLnguxEq5tQ8BRlZ\nwuOfpJK/FwKBgApHT0kRDjATJ/N2Qzv4CVP71BNWTfeh5H9d91j9o+m4oaoRzeh9\n+sbDOec0MiZ4ddayWH/GYp/odzjqgr6SrDkWFrpitF7tz6qwOfUS4p1JRnZx1ZO4\nCe5ROH3j9pKZRhcjRm12/izFzf2VAdU9SJQOf6sGXg7iAdyP0vh/965vAoGBANPD\nBmptHozWhpIISvb15tdA+u/jtaQ2XRvy0xh+pK7VmS7k9ihrO6ZF1exIpMpk6rNx\nWCMQLtXF+WDimVWSw+q5XiLSwvTvnvIFPYBUzDF/ETgFXDZkiz0R3hyDNwST96bZ\nL4GqbMEwzrk1InXPFe0XGpRx8Gf7PC0ppHPwmsyRAoGBAJ1GO1Ya9ySXOSrqXySC\n1lfKRdCAQdQ+G+oIqTXETvUoJuA4nojGY+tvDseB+QGwzjTFPvohSrdRZi6myZG/\n6+j1WaATZBRN3EWUgFX5IWbWs2OItT3leQO/i3Onznz/2E4ZXSOYE64R9QDIsJR8\n9ytp0M95Pv5NyEINHWcTFHBv\n-----END PRIVATE KEY-----\n",
+  "client_email": "os-98-605@oleg-scherbinin-project.iam.gserviceaccount.com",
+  "client_id": "108547937349450224895",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/os-98-605%40oleg-scherbinin-project.iam.gserviceaccount.com"
+}
