@@ -31,7 +31,7 @@ line-height: 109%;
 
 @layer base {
   p {
-    @apply mb-3;
+    @apply mb-[17.4px];
   }
   a {
     @apply underline underline-offset-2 decoration-1;

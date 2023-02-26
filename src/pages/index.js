@@ -21,7 +21,7 @@ const FooterLink = ({ link, title }) => {
   return (
     <>
       <a href={link}>{title}</a>
-      <span> /</span>
+      <span> / </span>
     </>
   );
 };
@@ -70,13 +70,13 @@ export default function Home() {
             onClick={() => {
               handleClick();
             }}
-            className="fixed top-0 right-2 mx-3 h-6 w-fit my-7 sm:hidden inline z-50"
+            className="fixed top-0 right-2 mt-[10px] mr-[10px] h-[33px] w-[50px] py-[7px] px-[10px] bg-white md:hidden inline z-50"
           />
         )}
         {!vMenu && (
           <div className="h-screen w-screen bg-white relative z-40">
             <div className="fixed top-0 left-0">
-              <div className="bg-white text-black mt-[15px] font-ibm text-logo ml-[30px] w-[128px] px-2.5  h-[34px] align-middle ">
+              <div className="bg-white text-black mt-[10px] font-ibm text-logo ml-[10px] w-[128px] px-2.5  h-[34px] align-middle ">
                 ГЕНКЛУБ
               </div>
             </div>
@@ -84,15 +84,15 @@ export default function Home() {
               onClick={() => {
                 handleClick();
               }}
-              className="fixed top-0 right-0 mx-3 h-6 w-fit my-7"
+              className="fixed top-0 right-0 mt-[13px] mr-[31px] h-fit w-fit my-7 bg-white"
             />
-            <div className="flex flex-col flex-wrap my-20 h-full w-full max-h-screen">
-              <div className="bg-white text-black my-6 mx-3 font-ibm p-1 text-norm h-fit w-fit  max-w-sm ">
+            <div className="flex flex-col flex-wrap h-full w-full max-h-screen">
+              <div className=" text-black mt-[103px] mx-4 font-ibm text-norm h-fit w-fit  max-w-sm ">
                 Уютное место для обмена знаниями про генеративное искусство. Тут
                 все всем помогают, делятся секретами, показывают свои и чужие
                 работы.
               </div>
-              <div className="bg-white text-black my-6 mx-3 font-ibm text-norm	h-fit max-w-md ">
+              <div className=" text-black mt-[35px] mx-4 font-ibm text-norm	h-fit max-w-md ">
                 <p>Присоединяйся!</p>
                 <p>
                   <a href="https://t.me/gen_c">основной чат</a>
@@ -104,7 +104,7 @@ export default function Home() {
                   <a href="https://t.me/every_nft_run">нфт и блокчейн</a>
                 </p>
                 <p>
-                  <a href="wiki.genclub.club">wiki</a>
+                  <a href="wiki.genclub.club">genclub.wiki</a>
                 </p>
                 <p>
                   <a href="https://course.genclub.club/">набор на новый курс</a>
@@ -118,18 +118,18 @@ export default function Home() {
             onClick={() => {
               hadleWorkClick();
             }}
-            className={`bg-white text-black mt-[15px] font-ibm text-logo ml-[30px] w-[128px] px-2.5  h-[34px] align-middle ${
+            className={`bg-white text-black md:mt-[15px] mt-[10px] font-ibm text-logo ml-[10px] w-[128px] px-2.5  h-[33px] align-middle ${
               !vMenu ? "hidden" : ""
             }`}
           >
             <span>ГЕНКЛУБ</span>
           </div>
 
-          <div className="bg-white text-black mt-[15px] my-6 mx-[15px] font-ibm px-2.5 py-1 text-norm h-fit max-w-[480px] sm:inline hidden">
+          <div className="bg-white text-black mt-[15px] my-6 mx-[15px] font-ibm px-2.5 py-1 text-norm h-fit max-w-[480px] md:inline hidden">
             Уютное место для обмена знаниями про генеративное искусство. Тут все
             всем помогают, делятся секретами, показывают свои и чужие работы.
           </div>
-          <div className="bg-white text-black mt-[15px] my-6 mr-[30px] font-ibm text-norm	h-fit max-w-[558px] min-w-[356px] sm:inline hidden px-2.5 py-1 ">
+          <div className="bg-white text-black mt-[15px] my-6 mr-[30px] font-ibm text-norm	h-fit max-w-[558px] min-w-[356px] md:inline hidden px-2.5 py-1 ">
             Присоединяйся! <a href="https://t.me/gen_c">основной чат</a> /
             <a href="https://t.me/gan_club"> нейроарт</a> /
             <a href="https://t.me/every_nft_run">нфт и блокчейн</a> /
@@ -147,9 +147,9 @@ export default function Home() {
         )}
 
         {artwork && (
-          <div className="fixed bottom-0 left-0 sm:flex flex-row w-full ">
+          <div className="fixed bottom-0 left-0 md:flex flex-row w-full ">
             <div
-              className={`bg-white text-black mb-[15px] ml-[30px] font-ibm sm:text-norm  text-mob px-2.5 py-1 w-fit h-fit max-w-md ${
+              className={`bg-white text-black md:mb-[15px] mb-[10px] md:ml-[30px] ml-[10px] font-ibm md:text-norm  text-mob md:px-2.5 px-[5px] py-1 w-fit h-fit max-w-md ${
                 !vMenu ? "hidden" : ""
               }`}
             >
