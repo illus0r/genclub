@@ -84,7 +84,7 @@ export default function Home() {
               onClick={() => {
                 handleClick();
               }}
-              className="fixed top-0 right-0 mt-[13px] mr-[31px] h-fit w-fit my-7 bg-white"
+              className="fixed top-0 right-0 mt-[10px] mr-[20px] h-[33px] w-[50px] my-7 bg-white"
             />
             <div className="flex flex-col flex-wrap h-full w-full max-h-screen">
               <div className=" text-black mt-[103px] mx-4 font-ibm text-norm h-fit w-fit  max-w-sm ">
@@ -154,8 +154,8 @@ export default function Home() {
               }`}
             >
               Арт: {artwork.name + " "} / {" "}
+              {artwork.website ? <FooterLink title={artwork.website} link={artwork.website}/> : ""}
               {artwork.twitter ? <FooterLink title="twitter" link={artwork.twitter }/> : ""}
-              {artwork.website ? <FooterLink title="website" link={artwork.twitter }/> : ""}
               {artwork.instagram ? <FooterLink title="instagram" link={artwork.instagram }/> : ""}
               {artwork.telegram ? <FooterLink title="telegram" link={artwork.telegram}/> : ""}
             </div>
