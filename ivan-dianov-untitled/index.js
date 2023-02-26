@@ -8,19 +8,31 @@ import {palettes} from './assets/palettes.js'
 
 
 let isPlaying = true
-let rndjs=[...Array(5)].map(_=>[Math.random()])
+let rndjs
 let mouse = [.5, .5];
-let palette = palettes[Math.random()*palettes.length | 0].map(color => {
+
+let palette
+
+function init(){
+	rndjs =	[...Array(5)].map(_=>[Math.random()])
+palette = palettes[Math.random()*palettes.length | 0].map(color => {
   color = color.slice(1)
   color = color.match(/(.{2})/g).map(v=>Number("0x"+v)/255)
   return color
 })
 palette = palette.sort(_=>Math.random()-.5)
 console.log('palette:',palette)
+}
+init()
+
+document.addEventListener('click', (event) => {
+	init()
+}, false)
 
 let gl = new Gl('canvas')
-gl.canvas.width = window.innerWidth/2
-gl.canvas.height = window.innerHeight/2
+//dpi
+gl.canvas.width = window.innerWidth * window.devicePixelRatio * .5
+gl.canvas.height = window.innerHeight * window.devicePixelRatio * .5
 
 let fsStr = loadText('./shader.frag')
 console.log(gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS));
@@ -55,7 +67,7 @@ let u_frame=0
 
 
 let imgSaveIndex = 0
-function frame() {
+function frame() {// ← 6
 	timePrev=timeNew
 	timeNew=+new Date()
 	let time = (timeNew-timeInit)/1000
@@ -64,14 +76,9 @@ function frame() {
 	if(isPlaying){
 
 		for(let i=0;i<1;i++){
-			tx.reverse()
-			tx[0].generateMipmap()
 			pr.uf({
-				// 'res': [tx[0].w,tx[0].h],
 				'res': [gl.canvas.width, gl.canvas.height],
 				'tx': tx[0],
-				'vox': vox,
-				'vox2': vox2,
 				'frame': u_frame,
 				'time': time,
 				'mouse': mouse,
@@ -98,7 +105,7 @@ function frame() {
 		// and increse timeInit by frame duration to freeze `time-timeInit` difference
 		timeInit+=timeNew-timePrev
 	}
-	// requestAnimationFrame(frame)
+	requestAnimationFrame(frame)
 }
 frame()
 // setInterval(frame,1000)
