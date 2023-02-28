@@ -18,10 +18,10 @@ const IFrame = ({ artworkPath, className }) => {
 };
 
 const FooterLink = ({ link, title }) => {
+  if (title === "telegram") link = "http://t.me/" + link
   return (
     <>
       <a href={link}>{title}</a>
-      <span> / </span>
     </>
   );
 };
@@ -41,6 +41,7 @@ export default function Home() {
           instagram
           artworkTitle
           website
+          telegram
           twitter
         }
       }
@@ -50,17 +51,19 @@ export default function Home() {
   const artworks = data.allGoogle1Sheet.nodes;
 
   function hadleWorkClick() {
-    setKeyGenerator((keyGenerator) => keyGenerator + 1);
-    console.log(keyGenerator);
+    setArtwork(artworks[Math.floor(Math.random() * artworks.length)]);
   }
   function handleClick() {
     setVMenu((vMenu) => !vMenu);
+
   }
+
 
   useLayoutEffect(() => {
     setArtwork(artworks[Math.floor(Math.random() * artworks.length)]);
   }, []);
 
+  console.log()
 
   return (
     <>
@@ -76,7 +79,7 @@ export default function Home() {
         {!vMenu && (
           <div className="h-screen w-screen bg-white relative z-40">
             <div className="fixed top-0 left-0">
-              <div className="bg-white text-black mt-[10px] font-ibm text-logo ml-[10px] w-[128px] px-2.5  h-[34px] align-middle ">
+              <div className="bg-white text-black mt-[10px] font-ibm text-logo ml-[10px] w-[128px] px-2.5  h-[34px] align-middle select-none">
                 ГЕНКЛУБ
               </div>
             </div>
@@ -118,7 +121,7 @@ export default function Home() {
             onClick={() => {
               hadleWorkClick();
             }}
-            className={`bg-white text-black md:mt-[15px] mt-[10px] font-ibm text-logo ml-[10px] w-[128px] px-2.5  h-[33px] align-middle ${
+            className={`bg-white text-black md:mt-[15px] mt-[10px] font-ibm text-logo ml-[10px] w-[128px] px-2.5  h-[33px] align-middle select-none ${
               !vMenu ? "hidden" : ""
             }`}
           >
@@ -129,7 +132,7 @@ export default function Home() {
             Уютное место для обмена знаниями про генеративное искусство. Тут все
             всем помогают, делятся секретами, показывают свои и чужие работы.
           </div>
-          <div className="bg-white text-black mt-[15px] my-6 mr-[30px] font-ibm text-norm	h-fit max-w-[558px] min-w-[356px] md:inline hidden px-2.5 py-1 ">
+          <div className="bg-white text-black mt-[15px] my-6 mr-[30px] font-ibm text-norm	h-fit max-w-[558px] min-w-[356px] md:inline hidden px-2.5 py-1 select-none">
             Присоединяйся! <a href="https://t.me/gen_c">основной чат</a> /
             <a href="https://t.me/gan_club"> нейроарт</a> /
             <a href="https://t.me/every_nft_run">нфт и блокчейн</a> /
@@ -149,15 +152,42 @@ export default function Home() {
         {artwork && (
           <div className="fixed bottom-0 left-0 md:flex flex-row w-full ">
             <div
-              className={`bg-white text-black md:mb-[15px] mb-[10px] md:ml-[30px] ml-[10px] font-ibm md:text-norm  text-mob md:px-2.5 px-[5px] py-1 w-fit h-fit max-w-md ${
+              className={`bg-white text-black md:mb-[15px] mb-[10px] md:ml-[30px] ml-[10px] font-ibm md:text-norm  text-mob md:px-2.5 px-[5px] py-1 w-fit h-fit md:max-w-full max-w-sm select-none ${
                 !vMenu ? "hidden" : ""
               }`}
             >
-              Арт: {artwork.name + " "} / {" "}
-              {artwork.website ? <FooterLink title={artwork.website} link={artwork.website}/> : ""}
-              {artwork.twitter ? <FooterLink title="twitter" link={artwork.twitter }/> : ""}
-              {artwork.instagram ? <FooterLink title="instagram" link={artwork.instagram }/> : ""}
-              {artwork.telegram ? <FooterLink title="telegram" link={artwork.telegram}/> : ""}
+              Арт: {artwork.name + " / "}
+              {[
+                artwork.website ? (
+                  <FooterLink title={artwork.website} link={artwork.website} />
+                ) : (
+                  ""
+                ),
+                artwork.twitter ? (
+                  <FooterLink title="twitter" link={artwork.twitter} />
+                ) : (
+                  ""
+                ),
+                artwork.instagram ? (
+                  <FooterLink title="instagram" link={artwork.instagram} />
+                ) : (
+                  ""
+                ),
+                artwork.telegram ? (
+                  <FooterLink title="telegram" link={artwork.telegram} />
+                ) : (
+                  ""
+                ),
+              ]
+                .filter((el) => el !== "")
+                .map((el, index, array) => {
+                  if (index !== array.length - 1) {
+                    return [el," / "];
+                  } else {
+                    return el;
+                  }
+                }).flat()
+                }
             </div>
           </div>
         )}
