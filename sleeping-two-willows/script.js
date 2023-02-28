@@ -1,11 +1,17 @@
 var SEED, W, H;
 
 function setup() {
-    //Math.random = fxrand
-    noLoop()
-    SEED = random() * 23811415
-    //SEED = fxrand() * 23811415
+    //noLoop()
+    frameRate(0)
     console.log(SEED)
+    __draw()
+}
+
+function windowResized() {
+    __draw()
+}
+
+function mouseClicked() {
     __draw()
 }
 
@@ -20,6 +26,7 @@ function get_config() {
 }
 
 function __draw(w = null) {
+    SEED = random() * 23811415
     randomSeed(SEED)
     noiseSeed(SEED)
     setup_canvas(w)
