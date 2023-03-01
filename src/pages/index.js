@@ -17,8 +17,11 @@ const IFrame = ({ artworkPath, className }) => {
   );
 };
 
-const FooterLink = ({ link, title }) => {
-  if (title === "telegram") link = "http://t.me/" + link
+const LinkConstruct = ({ link, title }) => {
+  if (title === "telegram") link = "http://t.me/" + link;
+  if (!link.match(/^https?:\/\/(.*)/gm)) link = "http://" + link;
+  if (title.match(/^https?:\/\/(.*)/gm))
+    title = title.replace(/^https?:\/\//, "");
   return (
     <>
       <a href={link}>{title}</a>
@@ -27,10 +30,9 @@ const FooterLink = ({ link, title }) => {
 };
 
 export default function Home() {
-  const [count, setCount] = useState(1);
   const [artwork, setArtwork] = useState();
   const [vMenu, setVMenu] = useState(true);
-  const [keyGenerator, setKeyGenerator] = useState(0);
+  const [keyGenerator] = useState(0);
 
   const data = useStaticQuery(graphql`
     query MyQuery {
@@ -55,15 +57,13 @@ export default function Home() {
   }
   function handleClick() {
     setVMenu((vMenu) => !vMenu);
-
   }
-
 
   useLayoutEffect(() => {
     setArtwork(artworks[Math.floor(Math.random() * artworks.length)]);
   }, []);
 
-  console.log()
+  console.log();
 
   return (
     <>
@@ -98,19 +98,32 @@ export default function Home() {
               <div className=" text-black mt-[35px] mx-4 font-ibm text-norm	h-fit max-w-md ">
                 <p>Присоединяйся!</p>
                 <p>
-                  <a href="https://t.me/gen_c">основной чат</a>
+                  <LinkConstruct
+                    link="https://t.me/gen_c"
+                    title="основной чат"
+                  />
                 </p>
                 <p>
-                  <a href="https://t.me/gan_club"> нейроарт</a>
+                  <LinkConstruct
+                    link="https://t.me/gan_club"
+                    title="нейроарт"
+                  />
+                </p>
+
+                <p>
+                  <LinkConstruct
+                    link="https://t.me/every_nft_run"
+                    title="нфт и блокчейн"
+                  />
                 </p>
                 <p>
-                  <a href="https://t.me/every_nft_run">нфт и блокчейн</a>
+                  <LinkConstruct link="wiki.genclub.club" title="wiki" />
                 </p>
                 <p>
-                  <a href="wiki.genclub.club">genclub.wiki</a>
-                </p>
-                <p>
-                  <a href="https://course.genclub.club/">набор на новый курс</a>
+                  <LinkConstruct
+                    link="https://course.genclub.club/"
+                    title="набор на новый курс"
+                  />
                 </p>
               </div>
             </div>
@@ -118,14 +131,17 @@ export default function Home() {
         )}
         <div className="fixed top-0 left-0 flex flex-row w-full">
           <div
-            onClick={() => {
-              hadleWorkClick();
-            }}
             className={`bg-white text-black md:mt-[15px] mt-[10px] font-ibm text-logo ml-[10px] w-[128px] px-2.5  h-[33px] align-middle select-none ${
               !vMenu ? "hidden" : ""
             }`}
           >
-            <span>ГЕНКЛУБ</span>
+            <span
+              onClick={() => {
+                hadleWorkClick();
+              }}
+            >
+              ГЕНКЛУБ
+            </span>
           </div>
 
           <div className="bg-white text-black mt-[15px] my-6 mx-[15px] font-ibm px-2.5 py-1 text-norm h-fit max-w-[480px] md:inline hidden">
@@ -133,11 +149,22 @@ export default function Home() {
             всем помогают, делятся секретами, показывают свои и чужие работы.
           </div>
           <div className="bg-white text-black mt-[15px] my-6 mr-[30px] font-ibm text-norm	h-fit max-w-[558px] min-w-[356px] md:inline hidden px-2.5 py-1 select-none">
-            Присоединяйся! <a href="https://t.me/gen_c">основной чат</a> /
-            <a href="https://t.me/gan_club"> нейроарт</a> /
-            <a href="https://t.me/every_nft_run">нфт и блокчейн</a> /
-            <a href="wiki.genclub.club">wiki</a> /
-            <a href="https://course.genclub.club/">набор на новый курс</a>
+            Присоединяйся!{" "}
+            <LinkConstruct link="https://t.me/gen_c" title="основной чат" />
+            {" / "}
+            <LinkConstruct link="https://t.me/gan_club" title="нейроарт" />
+            {" / "}
+            <LinkConstruct
+              link="https://t.me/every_nft_run"
+              title="нфт и блокчейн"
+            />
+            {" / "}
+            <LinkConstruct link="wiki.genclub.club" title="wiki" /> 
+            {" / "}
+            <LinkConstruct
+              link="https://course.genclub.club/"
+              title="набор на новый курс"
+            />
           </div>
         </div>
 
@@ -159,22 +186,25 @@ export default function Home() {
               Арт: {artwork.name + " / "}
               {[
                 artwork.website ? (
-                  <FooterLink title={artwork.website} link={artwork.website} />
+                  <LinkConstruct
+                    title={artwork.website}
+                    link={artwork.website}
+                  />
                 ) : (
                   ""
                 ),
                 artwork.twitter ? (
-                  <FooterLink title="twitter" link={artwork.twitter} />
+                  <LinkConstruct title="twitter" link={artwork.twitter} />
                 ) : (
                   ""
                 ),
                 artwork.instagram ? (
-                  <FooterLink title="instagram" link={artwork.instagram} />
+                  <LinkConstruct title="instagram" link={artwork.instagram} />
                 ) : (
                   ""
                 ),
                 artwork.telegram ? (
-                  <FooterLink title="telegram" link={artwork.telegram} />
+                  <LinkConstruct title="telegram" link={artwork.telegram} />
                 ) : (
                   ""
                 ),
@@ -182,12 +212,12 @@ export default function Home() {
                 .filter((el) => el !== "")
                 .map((el, index, array) => {
                   if (index !== array.length - 1) {
-                    return [el," / "];
+                    return [el, " / "];
                   } else {
                     return el;
                   }
-                }).flat()
-                }
+                })
+                .flat()}
             </div>
           </div>
         )}
