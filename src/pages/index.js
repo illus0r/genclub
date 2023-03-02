@@ -10,17 +10,19 @@ const IFrame = ({ artworkPath, className }) => {
     <div className={`h-screen w-screen z-30 ${className ? className : ""}`}>
       <iframe
         className={`h-full w-full `}
-        src={`/${artworkPath}/index.html`}
+        src={`${artworkPath}`}
         title={artworkPath}
       ></iframe>
     </div>
   );
 };
 
+const httpRegExp = /^https?:\/\/(.*)/gm
+
 const LinkConstruct = ({ link, title }) => {
-  if (title === "telegram") link = "http://t.me/" + link;
-  if (!link.match(/^https?:\/\/(.*)/gm)) link = "http://" + link;
-  if (title.match(/^https?:\/\/(.*)/gm))
+  if (title === "telegram" && !link.match(httpRegExp)) link = "http://t.me/" + link;
+  if (!link.match(httpRegExp)) link = "http://" + link;
+  if (title.match(httpRegExp))
     title = title.replace(/^https?:\/\//, "");
   return (
     <>
@@ -45,6 +47,7 @@ export default function Home() {
           website
           telegram
           twitter
+          artworkUrl
         }
       }
     }
@@ -171,7 +174,7 @@ export default function Home() {
         {artwork && (
           <IFrame
             key={keyGenerator}
-            artworkPath={artwork.slug}
+            artworkPath={artwork.artworkUrl ? artwork.artworkUrl : artwork.slug + "/index.html"}
             className={`${!vMenu ? "hidden" : ""}`}
           />
         )}
