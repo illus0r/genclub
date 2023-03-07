@@ -27,15 +27,22 @@ module.exports = {
       }
     },
     {
-      resolve: `gatsby-plugin-google-analytics`,
+      resolve: `gatsby-plugin-google-gtag`,
       options: {
-        trackingId: "G-ZD9D1Q6PLT",
-        head: true,
-        pageTransitionDelay: 0,
-        defer: false,
-        sampleRate: 5,
-        siteSpeedSampleRate: 10,
-        enableWebVitalsTracking: true,
+        trackingIds: [
+          "G-ZD9D1Q6PLT", 
+        ],
+
+        gtagConfig: {
+          optimize_id: "OPT_CONTAINER_ID",
+          anonymize_ip: true,
+          cookie_expires: 0,
+        },
+        pluginConfig: {
+          head: false,
+          respectDNT: true,
+          delayOnRouteUpdate: 0,
+        },
       },
     },
   ],

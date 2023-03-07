@@ -4,9 +4,10 @@ import { useState } from "react";
 import MenuIcon from "../assets/menu.svg";
 import CrestIcon from "../assets/crest.svg";
 import { useStaticQuery, graphql } from "gatsby";
-import { trackCustomEvent } from 'gatsby-plugin-google-analytics';
+import { useEffect } from "react";
 
-const IFrame = ({ artworkPath, className }) => {
+
+const IFrame = ({ artworkPath, className,  }) => {
   return (
     <div className={`h-screen w-screen z-30 ${className ? className : ""}`}>
       <iframe
@@ -18,16 +19,18 @@ const IFrame = ({ artworkPath, className }) => {
   );
 };
 
-const httpRegExp = /^https?:\/\/(.*)/gm
+const httpRegExp = /^https?:\/\/(.*)/gm;
 
 const LinkConstruct = ({ link, title }) => {
-  if (title === "telegram" && !link.match(httpRegExp)) link = "https://t.me/" + link;
-  if (title === "instagram" && !link.match(httpRegExp)) link = "https://www.instagram.com/" + link;
-  if (title === "twitter" && !link.match(httpRegExp)) link = "https://twitter.com/" + link;
-  
+  if (title === "telegram" && !link.match(httpRegExp))
+    link = "https://t.me/" + link;
+  if (title === "instagram" && !link.match(httpRegExp))
+    link = "https://www.instagram.com/" + link;
+  if (title === "twitter" && !link.match(httpRegExp))
+    link = "https://twitter.com/" + link;
+
   if (!link.match(httpRegExp)) link = "http://" + link;
-  if (title.match(httpRegExp))
-    title = title.replace(/^https?:\/\//, "");
+  if (title.match(httpRegExp)) title = title.replace(/^https?:\/\//, "");
   return (
     <>
       <a href={link}>{title}</a>
@@ -36,7 +39,7 @@ const LinkConstruct = ({ link, title }) => {
 };
 
 export default function Home() {
-  const [artwork, setArtwork] = useState();
+  const [artwork, setArtwork] = useState(null);
   const [vMenu, setVMenu] = useState(true);
   const [keyGenerator] = useState(0);
 
@@ -59,25 +62,32 @@ export default function Home() {
   const artworks = data.allGoogle1Sheet.nodes;
 
   function hadleWorkClick(e) {
-      e.preventDefault()
+    e.preventDefault();
 
     setArtwork(artworks[Math.floor(Math.random() * artworks.length)]);
-    trackCustomEvent({
-      category: "Play new artwork button",
-      action: "Click",
-      label: `${artwork.name} - ${artwork.artworkTitle}` ,
-    })
+    window.gtag("event", "genclub button click", {
+      artwork: `${artwork.name} - ${artwork.artworkTitle}`,
+      artist: `${artwork.name}`,
+    });
   }
   function handleClick() {
     setVMenu((vMenu) => !vMenu);
   }
 
+  function captureArtworkView () {
+    window.gtag("event", "view_artwork", {
+      artwork: `${artwork.name} - ${artwork.artworkTitle}`,
+      artist: `${artwork.name}`,
+    });
+  }
+
   useLayoutEffect(() => {
-    // let params = new URLSearchParams(document.location.search);
-    // let artworkQuery = params.get("artwork"); // null
-    // if (artworkQuery && artworks.filter(el => el.artworkTitle)) 
     setArtwork(artworks[Math.floor(Math.random() * artworks.length)]);
   }, []);
+
+  useEffect(()=> {
+    if (artwork) captureArtworkView ();
+  }, [artwork])
 
   return (
     <>
@@ -173,7 +183,7 @@ export default function Home() {
               title="нфт и блокчейн"
             />
             {" / "}
-            <LinkConstruct link="wiki.genclub.club" title="wiki" /> 
+            <LinkConstruct link="wiki.genclub.club" title="wiki" />
             {" / "}
             <LinkConstruct
               link="https://course.genclub.club/"
@@ -185,7 +195,11 @@ export default function Home() {
         {artwork && (
           <IFrame
             key={keyGenerator}
-            artworkPath={artwork.artworkUrl ? artwork.artworkUrl : artwork.slug + "/index.html"}
+            artworkPath={
+              artwork.artworkUrl
+                ? artwork.artworkUrl
+                : artwork.slug + "/index.html"
+            }
             className={`${!vMenu ? "hidden" : ""}`}
           />
         )}
