@@ -4,6 +4,7 @@ import { useState } from "react";
 import MenuIcon from "../assets/menu.svg";
 import CrestIcon from "../assets/crest.svg";
 import { useStaticQuery, graphql } from "gatsby";
+import { trackCustomEvent } from 'gatsby-plugin-google-analytics';
 
 const IFrame = ({ artworkPath, className }) => {
   return (
@@ -20,7 +21,10 @@ const IFrame = ({ artworkPath, className }) => {
 const httpRegExp = /^https?:\/\/(.*)/gm
 
 const LinkConstruct = ({ link, title }) => {
-  if (title === "telegram" && !link.match(httpRegExp)) link = "http://t.me/" + link;
+  if (title === "telegram" && !link.match(httpRegExp)) link = "https://t.me/" + link;
+  if (title === "instagram" && !link.match(httpRegExp)) link = "https://www.instagram.com/" + link;
+  if (title === "twitter" && !link.match(httpRegExp)) link = "https://twitter.com/" + link;
+  
   if (!link.match(httpRegExp)) link = "http://" + link;
   if (title.match(httpRegExp))
     title = title.replace(/^https?:\/\//, "");
@@ -52,21 +56,28 @@ export default function Home() {
       }
     }
   `);
-  // console.log(data.allGoogle1Sheet.nodes)
   const artworks = data.allGoogle1Sheet.nodes;
 
-  function hadleWorkClick() {
+  function hadleWorkClick(e) {
+      e.preventDefault()
+
     setArtwork(artworks[Math.floor(Math.random() * artworks.length)]);
+    trackCustomEvent({
+      category: "Play new artwork button",
+      action: "Click",
+      label: `${artwork.name} - ${artwork.artworkTitle}` ,
+    })
   }
   function handleClick() {
     setVMenu((vMenu) => !vMenu);
   }
 
   useLayoutEffect(() => {
+    // let params = new URLSearchParams(document.location.search);
+    // let artworkQuery = params.get("artwork"); // null
+    // if (artworkQuery && artworks.filter(el => el.artworkTitle)) 
     setArtwork(artworks[Math.floor(Math.random() * artworks.length)]);
   }, []);
-
-  console.log();
 
   return (
     <>
@@ -139,8 +150,8 @@ export default function Home() {
             }`}
           >
             <span
-              onClick={() => {
-                hadleWorkClick();
+              onClick={(e) => {
+                hadleWorkClick(e);
               }}
             >
               ГЕНКЛУБ

@@ -26,5 +26,17 @@ module.exports = {
         credentials: require(`./oleg-scherbinin-project-15aca17500ca.json`)
       }
     },
+    {
+      resolve: `gatsby-plugin-google-analytics`,
+      options: {
+        trackingId: "G-ZD9D1Q6PLT",
+        head: true,
+        pageTransitionDelay: 0,
+        defer: false,
+        sampleRate: 5,
+        siteSpeedSampleRate: 10,
+        enableWebVitalsTracking: true,
+      },
+    },
   ],
 }
