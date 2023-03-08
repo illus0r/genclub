@@ -6,8 +6,7 @@ import CrestIcon from "../assets/crest.svg";
 import { useStaticQuery, graphql } from "gatsby";
 import { useEffect } from "react";
 
-
-const IFrame = ({ artworkPath, className,  }) => {
+const IFrame = ({ artworkPath, className }) => {
   return (
     <div className={`h-screen w-screen z-30 ${className ? className : ""}`}>
       <iframe
@@ -43,6 +42,8 @@ export default function Home() {
   const [vMenu, setVMenu] = useState(true);
   const [keyGenerator] = useState(0);
 
+ 
+
   const data = useStaticQuery(graphql`
     query MyQuery {
       allGoogle1Sheet {
@@ -65,7 +66,7 @@ export default function Home() {
     e.preventDefault();
 
     setArtwork(artworks[Math.floor(Math.random() * artworks.length)]);
-    window.gtag("event", "genclub button click", {
+    window.gtag && window.gtag("event", "genclub button click", {
       artwork: `${artwork.name} - ${artwork.artworkTitle}`,
       artist: `${artwork.name}`,
     });
@@ -74,8 +75,8 @@ export default function Home() {
     setVMenu((vMenu) => !vMenu);
   }
 
-  function captureArtworkView () {
-    window.gtag("event", "view_artwork", {
+  function captureArtworkView() {
+    window.gtag && window.gtag("event", "view_artwork", {
       artwork: `${artwork.name} - ${artwork.artworkTitle}`,
       artist: `${artwork.name}`,
     });
@@ -85,9 +86,9 @@ export default function Home() {
     setArtwork(artworks[Math.floor(Math.random() * artworks.length)]);
   }, []);
 
-  useEffect(()=> {
-    if (artwork) captureArtworkView ();
-  }, [artwork])
+  useEffect(() => {
+    if (artwork) captureArtworkView();
+  }, [artwork]);
 
   return (
     <>
