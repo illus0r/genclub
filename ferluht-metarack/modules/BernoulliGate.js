@@ -1,4 +1,4 @@
-class BernoulliGate extends Module {
+class BG extends Module {
   constructor() {
     super({w:hp2x(4)});
     this.gate = 0;
@@ -6,8 +6,8 @@ class BernoulliGate extends Module {
     this.state = 'l';
 
     this.add_input(new InputEncoder({x:hp2x(0.6), y:46, r:7, vmin:0, vmax:1, val:0.5, name:'P'}));
-    this.add_output(new Port({x:hp2x(0.8), y:88, r:6, name:'OUTL'}));
-    this.add_output(new Port({x:hp2x(0.8), y:108, r:6, name:'OUTR'}));
+    this.add_output(new Port({x:hp2x(0.8), y:88, r:6, name:'OUTL', type:'output'}));
+    this.add_output(new Port({x:hp2x(0.8), y:108, r:6, name:'OUTR', type:'output'}));
     this.add_input(new Port({x:hp2x(0.8), y:68, r:6, name:'IN'}));
 
     this.l_led = new Led({x:hp2x(1.2), y:10.2, r:4});
@@ -23,6 +23,8 @@ class BernoulliGate extends Module {
   process() {
     this.p = this.i['P'].get();
     this.gate = this.i['IN'].get();
+    this.gate += 10;
+    this.gate /= 2;
     this.rand = rackrand();
     if (this.last_gate < this.gate) {
       if (this.rand < (this.p))
@@ -47,4 +49,4 @@ class BernoulliGate extends Module {
   }
 }
 
-engine.add_module_class(BernoulliGate);
+engine.add_module_class(BG);

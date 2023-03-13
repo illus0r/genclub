@@ -1,27 +1,10 @@
 document.addEventListener('contextmenu', event => event.preventDefault());
+var rackrand = fxrand; //rackrand;
 
-const rackSketch = (sketch) => {
-
-  sketch.setup = () => {
-    sketch.createCanvas(rackwidth, rackheight);
-    sketch.frameRate(fps);
-  }
-
-  sketch.draw = () => {
-    sketch.background(0,0,0,0);
-    engine.draw(0, 0);
-  };
-};
-
-let rackp5 = new p5(rackSketch);
-
-var rackrand = Math.random;
-
-let rackwidth = document.documentElement.clientWidth;
-let rackheight = document.documentElement.clientHeight - 20;
-let fps = 20;
+let fps = 60;
 let sample_rate = 44100;
 let background_color = 255;
+let rackp5;
 
 let engine;
 
@@ -42,8 +25,54 @@ function pow2(x, xr=0, y=1, c=1) {
 
 // STYLES
 
+let wire_diff;
+let wire_color = [198, 70, 15, 255];
+let white_text = false;
+
+let diff;
+let base;
+let module_color;
+
+let knob_color;
+let knob_diff;
+
+function choose_colors() {
+
+  wire_diff = [(rackrand() - 0.5) * 180, (rackrand() - 0.5) * 180, (rackrand() - 0.5) * 180];
+
+  if (rackrand() < 0.5)
+    wire_color = [254, 197, 46];
+  wire_color = [wire_color[0], wire_color[1] + wire_diff[1], wire_color[2] + wire_diff[2]];
+
+  diff = [(rackrand() - 0.5) * 30, (rackrand() - 0.5) * 30, (rackrand() - 0.5) * 30];
+  base = rackrand() * 30 + 200;
+  module_color = [base + diff[0], base + diff[1], base + diff[2]];
+
+  if (rackrand() < 0.25) {
+    knob_color = [232, 111, 104];
+  } else  if (rackrand() < 0.5) {
+    knob_color = [131, 183, 153]
+  } else if (rackrand() < 0.75) {
+    knob_color = [228, 216, 180];
+  } else knob_color = [190, 190, 190];
+
+  knob_diff = [(rackrand() - 0.5) * 80, (rackrand() - 0.5) * 80, (rackrand() - 0.5) * 80];
+  knob_color = [knob_color[0] + knob_diff[0], knob_color[1] + knob_diff[1], knob_color[2] + knob_diff[2]]
+}
+
+choose_colors();
+
+class WireStyle {
+  // constructor(core=[100, 100, 180, 255], edge=40) {
+  constructor(core=wire_color, edge=80) {
+    this.core = core;
+    this.edge = edge;
+  }
+}
+
 class PortStyle {
-  constructor(hole=45, ring=120, text=60, hastext=true){
+  // constructor(hole=45, ring=120, text=60, hastext=true){
+  constructor(hole=255, ring=80, text=100, hastext=true){
     this.hole = hole;
     this.ring = ring;
     this.text = text;
@@ -51,30 +80,23 @@ class PortStyle {
   }
 }
 
-class WireStyle {
-  constructor(core=[100, 100, 180, 255], edge=40) {
-    this.core = core;
-    this.edge = edge;
-  }
-}
-
 class ModuleStyle {
-  constructor(panel=[140, 80, 100, 255], frame=10, shadow=70, name=40, lining=180, label=255, background=255) {
+  // constructor(panel=[140, 80, 100, 255], frame=10, shadow=70, name=40, lining=180, label=255, background=255) {
+  constructor(panel=module_color, frame=60, shadow=70, name=40, lining=100, label=255, background_clr=255) {
     this.panel = panel;
     this.frame = frame;
     this.shadow = shadow;
     this.name = name;
     this.label = label;
     this.lining = lining;
-    this.background = background;
+    this.background = background_clr;
   }
 }
 
 // GRAPHICOBJECT
 
 class GraphicObject {
-  constructor({_p5=rackp5, x=0, y=0, w=0, h=0, name='name undefined', visible=true}={}) {
-    this._p5 = _p5;
+  constructor({x=0, y=0, w=0, h=0, name='name undefined', visible=true}={}) {
     this.set_position(x, y);
     this.set_size(w, h);
     this.gparent = null;
@@ -104,8 +126,8 @@ class GraphicObject {
 
     this.ax = x; this.ay = y;
 
-    if (!this.cbf && this.draw_cbf) { this.cbf = this._p5.createGraphics(this.w * engine.scale * engine.res_multiplier, this.h * engine.scale * engine.res_multiplier); this.draw_cbf(this.cbf, this.cbf.width, this.cbf.height); }
-    if (!this.sbf && this.draw_sbf) { this.sbf = this._p5.createGraphics(this.w * engine.scale * engine.res_multiplier, this.h * engine.scale * engine.res_multiplier); }
+    if (!this.cbf && this.draw_cbf) { this.cbf = createGraphics(this.w * engine.scale * engine.res_multiplier, this.h * engine.scale * engine.res_multiplier); this.draw_cbf(this.cbf, this.cbf.width, this.cbf.height); }
+    if (!this.sbf && this.draw_sbf) { this.sbf = createGraphics(this.w * engine.scale * engine.res_multiplier, this.h * engine.scale * engine.res_multiplier); }
     
     if (this.changed && this.draw_sbf) {
       sbf.erase(); sbf.noStroke(); sbf.rect(x + this.x, y + this.y, this.w, this.h); sbf.noErase();
@@ -145,8 +167,8 @@ class GraphicObject {
 // PORT
 
 class ProtoPort extends GraphicObject {
-  constructor({_p5=rackp5, x=10, y=10, r=7, name='', style=new PortStyle(), default_value=0, visible=true, isinput=false}={}) {
-    super({_p5:_p5, x:x, y:y, w:r*2, h:r*2, name:name, visible:visible});
+  constructor({x=10, y=10, r=7, name='', style=new PortStyle(), default_value=0, visible=true, isinput=false}={}) {
+    super({x:x, y:y, w:r*2, h:r*2, name:name, visible:visible});
     this.channels = 1;
     this.isinput = isinput;
     this.in_wire = null;
@@ -155,13 +177,14 @@ class ProtoPort extends GraphicObject {
     this.value = this.default_value;
     this.style = style;
     this.port = this;
+    this.pitch = null;
   }
 
   draw_cbf(buf, w, h) {
     let sw = 1.5;
     buf.background(0,0,0,0);
 
-    buf.stroke(this.style.ring); buf.strokeWeight(sw); buf.fill(this.style.hole);
+    buf.stroke(this.style.ring); buf.strokeWeight(sw); buf.fill(30);
     buf.circle(w / 2, h / 2, w - 2 * sw);
     buf.circle(w / 2, h / 2, w - 6 * sw);
   }
@@ -180,8 +203,9 @@ class ProtoPort extends GraphicObject {
 
   connect(port) {
     let w = new Wire();
-    w.connect(this, port);
-    engine.add_wire(w);
+    let r = w.connect(this, port);
+    if (r == true) engine.add_wire(w);
+    else w = null;
   }
 
   mouse_pressed(x, y, dx, dy) { engine.start_wire(x, y, this.spawn_or_get_wire()); }
@@ -221,8 +245,8 @@ class ProtoPort extends GraphicObject {
 }
 
 class Led extends GraphicObject {
-  constructor({_p5=rackp5, x=0, y=0, r=10, brightness=1} = {}) {
-    super ({_p5:_p5, x:x, y:y, w:2*r, h:r*2, name:'Led'});
+  constructor({x=0, y=0, r=10, brightness=1} = {}) {
+    super ({x:x, y:y, w:2*r, h:r*2, name:'Led'});
     this.brightness = brightness;
   }
 
@@ -244,8 +268,8 @@ class Led extends GraphicObject {
 }
 
 class Button extends GraphicObject {
-  constructor({_p5=rackp5, x=0, y=0, r=10, state=false} = {}) {
-    super ({_p5:_p5, x:x, y:y, w:2*r, h:r*2, name:'Button'});
+  constructor({x=0, y=0, r=10, state=false} = {}) {
+    super ({x:x, y:y, w:2*r, h:r*2, name:'Button'});
     this.state = state;
   }
 
@@ -269,23 +293,43 @@ class Button extends GraphicObject {
 }
 
 class Port extends GraphicObject {
-  constructor({_p5=rackp5, x=0, y=0, r=10, name='', style=new PortStyle(), default_value=0, visible=true, isinput=false}={}) {
-    super({_p5:_p5, x:x, y:y, w:2*r, h:r*3, name:name, visible:visible});
+  constructor({x=0, y=0, r=10, name='', style=new PortStyle(), default_value=0, visible=true, isinput=false, type='input'}={}) {
+    super({x:x, y:y, w:2*r, h:r*3, name:name, visible:visible});
     let pr = r * Math.pow(7 / this.w, 0.8);
     let px = this.w / 2 - pr;
     let py = this.h / 1.5 / 2 - pr;
     this.port = new ProtoPort({x:px, y:py, r:pr, name:name, default_value: default_value});
     this.attach(this.port);
+    this.type = type;
+    this.pitch = null;
   }
 
   draw_cbf(buf, w, h) {
     let sw = 1;
+
+    if (this.type == 'output') {
+      buf.fill(10)
+      buf.rect(w/15, h/15, w - w/8, h - h/8, 5);
+    } else {
+      buf.fill(255)
+      buf.rect(w/15, h/15, w - w/8, h - h/8, 5);
+    }
+
     buf.stroke(60); buf.strokeWeight(sw); buf.fill(255);
-    buf.rect(sw + w * 0.05, h / 1.5 + sw + h * 0.05, w - 2 * sw - w * 0.1, h / 3 - 2 * sw - h * 0.1);
+    //buf.rect(sw + w * 0.05, h / 1.5 + sw + h * 0.05, w - 2 * sw - w * 0.1, h / 3 - 2 * sw - h * 0.1);
 
     buf.textSize(w / 4);
-    buf.fill(60);
-    buf.textAlign(this._p5.CENTER, this._p5.CENTER);
+
+    if (this.type == 'output') {
+      buf.fill(230)
+      //buf.rect(w/15, h/15, w - w/8, h - h/8, 5);
+    } else {
+      buf.fill(60)
+      //buf.rect(w/15, h/15, w - w/8, h - h/8, 5);
+    }
+
+    //buf.fill(60);
+    buf.textAlign(buf.CENTER, buf.CENTER);
     buf.strokeWeight(sw / 10);
     buf.text(this.name.substring(0,5), w / 2, h * 5 / 6 + 1);
   }
@@ -294,14 +338,15 @@ class Port extends GraphicObject {
   get() { return this.port.value; }
   connect(c) {
     let w = new Wire();
-    w.connect(this.port, c.port);
-    engine.add_wire(w);
+    let r = w.connect(this.port, c.port);
+    if (r == true) engine.add_wire(w);
+    else w = null;
   }
 }
 
 class Encoder extends GraphicObject {
-  constructor({_p5=rackp5, x=0, y=0, r=10, name='?', val=5, vmin=-10, vmax=10, precision=6, mod=0.1}={}) {
-    super({_p5:_p5, x:x, y:y, w:2*r, h:3*r, name:name});
+  constructor({x=0, y=0, r=10, name='?', val=5, vmin=-10, vmax=10, precision=6, mod=0.1}={}) {
+    super({x:x, y:y, w:2*r, h:3*r, name:name});
     this.def_val = val;
     this.def_mod = mod;
     this.base_val = val;
@@ -315,6 +360,10 @@ class Encoder extends GraphicObject {
     this.rc = 0.8;
     this.r = 0;
 
+    this.value_changed = false;
+    this.first_time = true;
+    
+    //knob_color = [131, 183, 153];//190
     this.precision = Math.min(precision, Math.min(2, 2 - Math.floor(Math.log10(Math.abs(vmax - vmin) / 20))));
     this.prev_base_val = this.base_val;
     this.sample_counter = 0;
@@ -334,10 +383,19 @@ class Encoder extends GraphicObject {
   draw_cbf(buf, w, h) {
     let sw = 1;
     this.r = w / 2 * this.rc;
-    buf.noStroke(); buf.fill(255);
-    buf.circle(w / 2, w / 2, this.r * 2 + sw * 8);
-    buf.stroke(60); buf.strokeWeight(sw); buf.fill(255);
+    buf.noStroke(); buf.fill(190);
+    //buf.circle(w / 2, w / 2, this.r * 2 + sw * 8);
+    //buf.stroke(60); buf.strokeWeight(this.r/3); buf.fill(127);
+    buf.stroke(0); buf.strokeWeight(1.5*sw); buf.fill(60);
     buf.circle(w / 2, w / 2, this.r * 2 - 2 * sw);
+    buf.stroke(60); buf.strokeWeight(sw); 
+    
+    buf.fill(knob_color);
+    buf.circle(w / 2, w / 2, (this.r * 2 - 2 * sw) / 1.4);
+    buf.stroke(knob_color); 
+    buf.strokeWeight(sw); 
+    buf.fill(knob_color);
+    buf.circle(w / 2, w / 2, (this.r * 2 - 2 * sw) / 2);
   }
 
   draw_sbf(buf, w, h) {
@@ -345,65 +403,83 @@ class Encoder extends GraphicObject {
     let sw = 3;
     sw = 4;
     buf.stroke(60); buf.strokeWeight(sw); buf.noFill();
-    this.ang_high = this.val2ang(this.base_val.toFixed(this.precision)) + this._p5.HALF_PI;
-    if (this.ang_high - this._p5.HALF_PI > 0.05) 
-      buf.arc(w / 2, w / 2, this.r * 2 - 2 * sw, this.r * 2 - 2 * sw, this._p5.HALF_PI, this.ang_high - 0.05);
-    else 
-      buf.arc(w / 2, w / 2, this.r * 2 - 2 * sw, this.r * 2 - 2 * sw, this.ang_high - 0.05, this._p5.HALF_PI);
+    this.ang_high = this.val2ang(this.base_val.toFixed(this.precision)) + buf.HALF_PI;
+    // if (this.ang_high - buf.HALF_PI > 0.05) 
+    //   buf.arc(w / 2, w / 2, this.r * 2 - 2 * sw, this.r * 2 - 2 * sw, buf.HALF_PI, this.ang_high - 0.05);
+    // else 
+    //   buf.arc(w / 2, w / 2, this.r * 2 - 2 * sw, this.r * 2 - 2 * sw, this.ang_high - 0.05, buf.HALF_PI);
     sw = 2;
-    buf.strokeWeight(sw);
-    buf.line(w / 2 + Math.cos(this.ang_high) * (this.r - 5), w / 2 + Math.sin(this.ang_high) * (this.r - 5), 
-             w / 2 + Math.cos(this.ang_high) * (this.r + 1), w / 2 + Math.sin(this.ang_high) * (this.r + 1));
+    buf.strokeWeight(sw*3);
+    buf.stroke(knob_color);
+    //buf.stroke([131, 183, 153])
+    buf.line(w / 2 + Math.cos(this.ang_high) * (this.r - 2.8), w / 2 + Math.sin(this.ang_high) * (this.r - 2.8), 
+             w / 2 + Math.cos(this.ang_high) * (this.r + 1)/2, w / 2 + Math.sin(this.ang_high) * (this.r + 1)/2);
 
     sw = 1;
-    buf.stroke(60); buf.strokeWeight(sw); buf.fill(255);
-    buf.rect(sw + w * 0.1, h / 1.5 + sw + h * 0.05, w - 2 * sw - w * 0.2, h / 3 - 2 * sw - h * 0.1);
+    buf.stroke(60); buf.strokeWeight(0); buf.fill(255);
+    //buf.rect(sw + w * 0.1, h / 1.5 + sw + h * 0.05, w - 2 * sw - w * 0.2, h / 3 - 2 * sw - h * 0.1, 5);
 
     sw = 0.1;
     buf.textSize(w / 4);
-    buf.fill(60);
-    buf.textAlign(this._p5.CENTER, this._p5.CENTER);
+
+    if (white_text)
+      buf.fill(245);
+    else
+      buf.fill(0);
+    buf.textAlign(buf.CENTER, buf.CENTER);
     buf.strokeWeight(sw);
-    buf.text(this.base_val.toFixed(this.precision), w / 2, h / 3);
+    //buf.text(this.base_val.toFixed(this.precision), w / 2, h / 3);
+    buf.textSize(w / 4);
     buf.text(this.name.substring(0,4), w / 2, h * 5 / 6 + 1);
   }
 
   get() { 
-    if (this.changed) {
-      this.nochange_counter = 0;
-      this.nochange_flag = false;
-      this.c = this.sample_counter / (sample_rate / fps);
-      this.sample_counter++;
-      if (this.c <= 1)
-        this.filter.in = (this.base_val * this.c + this.prev_base_val * (1 - this.c));
-      else {
-        this.filter.in = this.base_val;
-      }
-      this.filter.process();
-      return this.filter.lp;
-      
-    }
-    else {
-      this.sample_counter = 0;
-      if (!this.nochange_flag) this.nochange_counter++;
-      if (this.nochange_counter > sample_rate / 2) {
+    if (this.value_changed) {
+      if ((this.changed)) {
         this.nochange_counter = 0;
-        this.nochange_flag = true;
-      }
-      this.prev_base_val = this.base_val;
-      if (!this.nochange_flag) {
-        this.filter.in = this.base_val;
+        this.nochange_flag = false;
+        this.c = this.sample_counter / (sample_rate / 0.1);
+        this.sample_counter++;
+        if (this.c <= 1)
+          this.filter.in = (this.base_val * this.c + this.prev_base_val * (1 - this.c));
+        else {
+          this.filter.in = this.base_val;
+
+        }
         this.filter.process();
         return this.filter.lp;
+        
       }
       else {
-        return this.base_val;
+        this.sample_counter = 0;
+        if (!this.nochange_flag) this.nochange_counter++;
+        if (this.nochange_counter > sample_rate * 30) {
+          this.nochange_counter = 0;
+          this.nochange_flag = true;
+        }
+        this.prev_base_val = this.base_val;
+        if (!this.nochange_flag) {
+          this.filter.in = this.base_val;
+          this.filter.process();
+          return this.filter.lp;
+        }
+        else {
+          return this.base_val;
+        }
       }
+    } 
+    else {
+      return this.base_val;
     }
-    
   }
 
-  set(v) { this.prev_base_val = this.base_val; this.sample_counter = 0; this.base_val = v; this.changed = true; }
+  set(v) { 
+    if (this.first_time) 
+      this.first_time = false; 
+    else
+      this.value_changed = true;
+    this.prev_base_val = this.base_val; this.sample_counter = 0; this.base_val = v; this.changed = true; 
+  }
 
   mouse_pressed(x, y, dx, dy) { this.prev_base_val = this.base_val; this.sample_counter = 0; this.changed = true; }
   mouse_dragged(x, y, dx, dy) { 
@@ -413,9 +489,10 @@ class Encoder extends GraphicObject {
     if (this.base_val > this.vmax) this.base_val = this.vmax;
     if (this.base_val < this.vmin) this.base_val = this.vmin + 0.0001;
     this.changed=true;
+    this.value_changed = true;
   }
   mouse_released(x, y, dx, dy) { this.prev_base_val = this.base_val; this.sample_counter = 0; this.changed = true; engine.undo_checkpoint();}
-  double_clicked(x, y, dx, dy) { this.prev_base_val = this.base_val; this.sample_counter = 0; this.base_val = this.def_val; this.mod = this.def_mod; this.changed = true; engine.undo_checkpoint();}
+  double_clicked(x, y, dx, dy) { this.value_changed = true; this.prev_base_val = this.base_val; this.sample_counter = 0; this.base_val = this.def_val; this.mod = this.def_mod; this.changed = true; engine.undo_checkpoint();}
 
   save() { return this.base_val.toFixed(6); }
   load(s) { 
@@ -427,11 +504,11 @@ class Encoder extends GraphicObject {
 }
 
 class StepEncoder extends Encoder {
-  constructor({_p5=rackp5, x=0, y=0, r=10, name='?', val=5, vmin=-10, vmax=10, mod=0.1, step=1, nonzero=true}={}) {
+  constructor({x=0, y=0, r=10, name='?', val=5, vmin=-10, vmax=10, mod=0.1, step=1, nonzero=true}={}) {
     if (nonzero)
-      super({_p5:_p5, x:x, y:y, r:r, name:name, val:val, vmin:(vmin+step), vmax:vmax, mod:mod});
+      super({x:x, y:y, r:r, name:name, val:val, vmin:(vmin+step), vmax:vmax, mod:mod});
     else
-      super({_p5:_p5, x:x, y:y, r:r, name:name, val:val, vmin:vmin, vmax:vmax, mod:mod});
+      super({x:x, y:y, r:r, name:name, val:val, vmin:vmin, vmax:vmax, mod:mod});
     this.nonzero = nonzero;
     this.step = step;
     this.y0 = 0;
@@ -451,36 +528,36 @@ class StepEncoder extends Encoder {
     this.changed=true;
   }
 
-  draw_sbf(buf, w, h) {
-    this.r = w / 2 * this.rc;
-    let sw = 3;
-    sw = 4;
-    buf.stroke(60); buf.strokeWeight(sw); buf.noFill();
-    this.ang_high = this.val2ang(this.base_val) + this._p5.HALF_PI;
-    if (this.ang_high - this._p5.HALF_PI > 0.05) 
-      buf.arc(w / 2, w / 2, this.r * 2 - 2 * sw, this.r * 2 - 2 * sw, this._p5.HALF_PI, this.ang_high - 0.05);
-    else 
-      buf.arc(w / 2, w / 2, this.r * 2 - 2 * sw, this.r * 2 - 2 * sw, this.ang_high - 0.05, this._p5.HALF_PI);
-    sw = 2;
-    buf.strokeWeight(sw);
-    buf.line(w / 2 + Math.cos(this.ang_high) * (this.r - 5), w / 2 + Math.sin(this.ang_high) * (this.r - 5), 
-             w / 2 + Math.cos(this.ang_high) * (this.r + 1), w / 2 + Math.sin(this.ang_high) * (this.r + 1));
+  // draw_sbf(buf, w, h) {
+  //   this.r = w / 2 * this.rc;
+  //   let sw = 3;
+  //   sw = 4;
+  //   buf.stroke(60); buf.strokeWeight(sw); buf.noFill();
+  //   this.ang_high = this.val2ang(this.base_val) + buf.HALF_PI;
+  //   if (this.ang_high - buf.HALF_PI > 0.05) 
+  //     buf.arc(w / 2, w / 2, this.r * 2 - 2 * sw, this.r * 2 - 2 * sw, buf.HALF_PI, this.ang_high - 0.05);
+  //   else 
+  //     buf.arc(w / 2, w / 2, this.r * 2 - 2 * sw, this.r * 2 - 2 * sw, this.ang_high - 0.05, buf.HALF_PI);
+  //   sw = 2;
+  //   buf.strokeWeight(sw);
+  //   buf.line(w / 2 + Math.cos(this.ang_high) * (this.r - 5), w / 2 + Math.sin(this.ang_high) * (this.r - 5), 
+  //            w / 2 + Math.cos(this.ang_high) * (this.r + 1), w / 2 + Math.sin(this.ang_high) * (this.r + 1));
 
-    sw = 1;
-    buf.stroke(60); buf.strokeWeight(sw); buf.fill(255);
-    buf.rect(sw + w * 0.1, h / 1.5 + sw + h * 0.05, w - 2 * sw - w * 0.2, h / 3 - 2 * sw - h * 0.1);
+  //   sw = 1;
+  //   buf.stroke(60); buf.strokeWeight(sw); buf.fill(255);
+  //   buf.rect(sw + w * 0.1, h / 1.5 + sw + h * 0.05, w - 2 * sw - w * 0.2, h / 3 - 2 * sw - h * 0.1);
 
-    sw = 0.1;
-    buf.textSize(w / 4);
-    buf.fill(60);
-    buf.textAlign(this._p5.CENTER, this._p5.CENTER);
-    buf.strokeWeight(sw);
-    if ((this.base_val <= 0) && (this.nonzero)) 
-      buf.text((this.base_val - this.step).toFixed(this.precision), w / 2, h / 3);
-    else
-      buf.text(this.base_val.toFixed(this.precision), w / 2, h / 3);
-    buf.text(this.name.substring(0,4), w / 2, h * 5 / 6 + 1);
-  }
+  //   sw = 0.1;
+  //   buf.textSize(w / 4);
+  //   buf.fill(60);
+  //   buf.textAlign(buf.CENTER, buf.CENTER);
+  //   buf.strokeWeight(sw);
+  //   // if ((this.base_val <= 0) && (this.nonzero)) 
+  //   //   //buf.text((this.base_val - this.step).toFixed(this.precision), w / 2, h / 3);
+  //   // else
+  //   //   buf.text(this.base_val.toFixed(this.precision), w / 2, h / 3);
+  //   buf.text(this.name.substring(0,4), w / 2, h * 5 / 6 + 1);
+  // }
 
   get(){ 
     if ((this.base_val <= 0) && (this.nonzero)) {
@@ -501,6 +578,8 @@ class StepEncoder extends Encoder {
   }
 }
 
+
+
 class InputEncoder extends Encoder {
   constructor(...args) {
     super(...args);
@@ -509,6 +588,15 @@ class InputEncoder extends Encoder {
     this.mod_coef = 0.1 * this.mod * (this.vmax - this.vmin);
     this.val = this.base_val;
     this.port.isinput = true;
+
+    this.flag = true;    
+  }
+
+  preload() {
+    if (this.flag) {
+      this.img = loadImage('./knob.png');
+      this.flag = false;
+    }
   }
 
   draw_sbf(buf, w, h) {
@@ -517,19 +605,21 @@ class InputEncoder extends Encoder {
     if (this.port.isinput && this.port.wires.length > 0) {
       let sw = 1.5;
       let dv = this.mod * (this.vmax - this.vmin);
-      this.ang_low = this.val2ang(this.base_val - dv) + this._p5.HALF_PI;
-      buf.stroke(60); buf.strokeWeight(sw); buf.noFill();
-      this.ang_high = this.val2ang(this.base_val + dv) + this._p5.HALF_PI;
+      this.ang_low = this.val2ang(this.base_val - dv) + buf.HALF_PI;
+      buf.stroke(0); buf.strokeWeight(2*sw); buf.noFill();
+      this.ang_high = this.val2ang(this.base_val + dv) + buf.HALF_PI;
       buf.line(w / 2 + Math.cos(this.ang_high) * (this.r - 1), w / 2 + Math.sin(this.ang_high) * (this.r - 1), 
            w / 2 + Math.cos(this.ang_high) * (this.r + 3), w / 2 + Math.sin(this.ang_high) * (this.r + 3));
 
       if (this.ang_low < this.ang_high) {
         if (Math.abs(this.ang_low - this.ang_high) > 0.001) 
-          buf.arc(w / 2, w / 2, this.r * 2 + 2 * sw, this.r * 2 + 2 * sw, this.ang_low, this.ang_high); buf.fill(255);
+          buf.arc(w / 2, w / 2, this.r * 2 + 4 * sw, this.r * 2 + 4 * sw, this.ang_low, this.ang_high); buf.fill(255);
+        buf.strokeWeight(sw)
         buf.circle(w / 2 + Math.cos(this.ang_low) * (this.r + 2), w / 2 + Math.sin(this.ang_low) * (this.r + 2), 6);
       } else {
         if (Math.abs(this.ang_low - this.ang_high) > 0.001) 
-          buf.arc(w / 2, w / 2, this.r * 2 + 2 * sw, this.r * 2 + 2 * sw, this.ang_high, this.ang_low); buf.fill(255);
+          buf.arc(w / 2, w / 2, this.r * 2 + 4 * sw, this.r * 2 + 4 * sw, this.ang_high, this.ang_low); buf.fill(255);
+        buf.strokeWeight(sw)
         buf.circle(w / 2 + Math.cos(this.ang_low) * (this.r + 2), w / 2 + Math.sin(this.ang_low) * (this.r + 2), 6);
       }
     }
@@ -538,52 +628,66 @@ class InputEncoder extends Encoder {
   draw_dbf(buf, x, y, w, h) { this.mod_coef = (this.port.wires.length > 0) * 0.1 * this.mod * (this.vmax - this.vmin); }
   
   get() { 
-    if (this.changed) {
-      this.nochange_counter = 0;
-      this.nochange_flag = false;
-      this.c = this.sample_counter / (sample_rate / fps);
-      this.sample_counter++;
-      if (this.c <= 1) {
-        //this.filter.in = ((Math.sin((this.c - 0.5) * Math.PI) / 2) + 0.5) * (this.base_val - this.prev_base_val) + this.prev_base_val;
-        this.filter.in = (this.base_val * this.c + this.prev_base_val * (1 - this.c));
+    if ((this.value_changed)) {
+      if ((this.changed)) {
+        this.nochange_counter = 0;
+        this.nochange_flag = false;
+        this.c = this.sample_counter / (sample_rate / fps); //here
+        this.sample_counter++;
+        if (this.c <= 1) {
+          //this.filter.in = ((Math.sin((this.c - 0.5) * Math.PI) / 2) + 0.5) * (this.base_val - this.prev_base_val) + this.prev_base_val;
+          this.filter.in = (this.base_val * this.c + this.prev_base_val * (1 - this.c));
 
-        //return ((Math.sin((this.c - 0.5) * Math.PI) / 2) + 0.5) * (this.base_val - this.prev_base_val) + this.prev_base_val + this.mod_coef * this.port.get();
+          //return ((Math.sin((this.c - 0.5) * Math.PI) / 2) + 0.5) * (this.base_val - this.prev_base_val) + this.prev_base_val + this.mod_coef * this.port.get();
+        }
+        else {
+          this.filter.in = this.base_val;
+
+          //this.filter2.in = this.filter.lp;
+          //return this.base_val + this.mod_coef * this.port.get(); 
+        }
+        //this.filter.in = (this.base_val * this.c + this.prev_base_val * (1 - this.c));
+        this.filter.process();
+        //this.filter2.process();
+        return this.filter.lp + this.mod_coef * this.port.get();
+        
       }
       else {
-        this.filter.in = this.base_val;
-        //this.filter2.in = this.filter.lp;
+        this.sample_counter = 0;
+        if (!this.nochange_flag) this.nochange_counter++;
+        if (this.nochange_counter > sample_rate * 30) { //here (* 2)
+          this.nochange_counter = 0;
+          this.nochange_flag = true;
+        }
+        this.prev_base_val = this.base_val;
+        if (!this.nochange_flag) {
+          this.filter.in = this.base_val;
+          this.filter.process();
+          return this.filter.lp + this.mod_coef * this.port.get();
+        }
+        else {
+          return this.base_val + this.mod_coef * this.port.get();
+        }
         //return this.base_val + this.mod_coef * this.port.get(); 
       }
-      //this.filter.in = (this.base_val * this.c + this.prev_base_val * (1 - this.c));
-      this.filter.process();
-      //this.filter2.process();
-      return this.filter.lp + this.mod_coef * this.port.get();
-      
     }
     else {
-      this.sample_counter = 0;
-      if (!this.nochange_flag) this.nochange_counter++;
-      if (this.nochange_counter > sample_rate * 2) {
-        this.nochange_counter = 0;
-        this.nochange_flag = true;
-      }
-      this.prev_base_val = this.base_val;
-      if (!this.nochange_flag) {
-        this.filter.in = this.base_val;
-        this.filter.process();
-        return this.filter.lp + this.mod_coef * this.port.get();
-      }
-      else {
-        return this.base_val + this.mod_coef * this.port.get();
-      }
-      //return this.base_val + this.mod_coef * this.port.get(); 
+      return this.base_val + this.mod_coef * this.port.get();
     }
   }
-  set(v) { this.prev_base_val = this.base_val; this.sample_counter = 0; this.base_val = v; this.changed = true;}
+  set(v) { 
+    if (this.first_time) 
+      this.first_time = false; 
+    else {
+      this.value_changed = true;
+    }
+    this.prev_base_val = this.base_val; this.sample_counter = 0; this.base_val = v; this.changed = true;
+  }
   connect(c) {
     let w = new Wire();
-    w.connect(this.port, c.port);
-    engine.add_wire(w);
+    let r = w.connect(this.port, c.port);
+    if (r == true) engine.add_wire(w);
+    else w = null;
   }
 
   mouse_dragged(x, y, dx, dy) {
@@ -599,6 +703,7 @@ class InputEncoder extends Encoder {
       if (this.mod < -1) this.mod = -1;
     }
     this.changed=true;
+    this.value_changed = true;
   }
 
   save() { return { 'val': this.base_val.toFixed(6), 'mod': this.mod.toFixed(6) } }
@@ -614,7 +719,7 @@ class InputEncoder extends Encoder {
 // WIRE
 
 class Wire extends GraphicObject {
-  constructor({_p5=rackp5, a=null, b=null, style=new WireStyle()}={}) {
+  constructor({a=null, b=null, style=new WireStyle()}={}) {
     super();
     this.a = a;
     this.b = b;
@@ -623,8 +728,10 @@ class Wire extends GraphicObject {
 
   process() {
     if (!this.a || !this.b) return;
-    if (this.b.isinput) this.b.value = this.a.value;
-    if (this.a.isinput) this.a.value = this.b.value;
+
+    if (this.b.isinput) {this.b.value = this.a.value; this.b.pitch = this.a.pitch;}
+    if (this.a.isinput) {this.a.value = this.b.value; this.a.pitch = this.b.pitch;}
+    
   }
 
   draw_wire(buf, p1, p2) {
@@ -643,15 +750,44 @@ class Wire extends GraphicObject {
 
     buf.stroke(this.style.edge);
     buf.fill(this.style.core);
+
+    // buf.strokeWeight(0);
+    // buf.fill(60)
+    // if (this.a) buf.circle(p1[0], p1[1], this.a.w * 0.7 / 1);
+    // else buf.circle(p1[0], p1[1], 3.5);
+
+    // if (!this.b || this.b.visible) {
+    //   if (this.b) buf.circle(p2[0], p2[1], this.b.w * 0.7 / 1);
+    //   else buf.circle(p2[0], p2[1], 3.5);
+    // }
+
+    if ((this.a != null) && (this.b != null)) {
+      this.dest = null;
+      if (this.a.isinput) {
+        this.dest = this.a;
+      } else {
+        this.dest = this.b;
+      }
+      if (this.dest.value[0] === undefined) {
+        if (this.dest.value > 0) {
+          buf.fill([0, 255 * this.dest.value * 2, 0]);
+        } else {
+          buf.fill([255 * Math.abs(this.dest.value * 2), 0, 0]);
+        } 
+      } else buf.fill(this.style.core[0], this.style.core[1], this.style.core[2]);
+    } else
+      buf.fill(this.style.core[0], this.style.core[1], this.style.core[2]);
+
     buf.strokeWeight(0.5);
-    if (this.a) buf.circle(p1[0], p1[1], this.a.w * 0.7);
+    buf.stroke(0);
+    if (this.a) buf.circle(p1[0], p1[1], this.a.w * 0.7 / 1.4);
     else buf.circle(p1[0], p1[1], 3.5);
 
     if (!this.b || this.b.visible) {
-      if (this.b) buf.circle(p2[0], p2[1], this.b.w * 0.7);
+      if (this.b) buf.circle(p2[0], p2[1], this.b.w * 0.7 / 1.4);
       else buf.circle(p2[0], p2[1], 3.5);
       
-      buf.stroke(this.style.edge);
+      buf.stroke(0);
       buf.strokeWeight(2);
       buf.noFill();
       buf.bezier(p1[0], p1[1], midx1, midy1, midx2, midy2, p2[0], p2[1]);
@@ -690,26 +826,32 @@ class Wire extends GraphicObject {
   }
 
   save() {
-    if (!this.a.isinput) 
+    if (this.a != null) {
+      if (!this.a.isinput) 
+        return {
+          'a': {
+            'mid': this.a.module.id,
+            'pid': this.a.name,
+          },
+          'b': {
+            'mid': this.b.module.id,
+            'pid': this.b.name
+          }
+        }
       return {
-        'a': {
+        'b': {
           'mid': this.a.module.id,
           'pid': this.a.name,
         },
-        'b': {
+        'a': {
           'mid': this.b.module.id,
           'pid': this.b.name
         }
       }
-    return {
-      'b': {
-        'mid': this.a.module.id,
-        'pid': this.a.name,
-      },
-      'a': {
-        'mid': this.b.module.id,
-        'pid': this.b.name
-      }
+    }
+    else {
+      console.log('null wire')
+      console.log(this)
     }
   }
 }
@@ -717,14 +859,14 @@ class Wire extends GraphicObject {
 // MODULE
 
 class Module extends GraphicObject {
-  constructor({_p5=rackp5, name='', x=0, y=0, w=0, h=128.5, style = new ModuleStyle()}) {
-    super({_p5:_p5, x:x, y:y, w:w, h:h});
+  constructor({name='', x=0, y=0, w=0, h=128.5, style = new ModuleStyle()}) {
+    super({x:x, y:y, w:w, h:h});
     this.name = this.constructor.name
-    this._p5 = _p5;
     this.i = {};
     this.o = {};
     this.c = {};
     this.style = style;
+
     this.id = 0;
     if (engine) engine.add_module(this);
   }
@@ -734,18 +876,18 @@ class Module extends GraphicObject {
     let rounding = 5;
     buf.background(0,0,0,0);
 
-    buf.stroke(this.style.shadow); buf.strokeWeight(sw); buf.strokeJoin(this._p5.ROUND); buf.fill(this.style.panel);
+    buf.stroke(this.style.shadow); buf.strokeWeight(sw * 3); buf.strokeJoin(buf.ROUND); buf.fill(this.style.panel);
     buf.rect(sw / 2, sw / 2, w - sw, h - sw, rounding, rounding, rounding, rounding);
 
-    buf.stroke(this.style.lining); buf.strokeWeight(sw / 3);
-    let line_step = 5;// + rackrand() * 3;
-    let x1 = 0;
-    while (x1 < w + h) {
-      x1 += line_step;
-      buf.line(x1, 0, 0, x1);
-    }
-    buf.stroke(255); buf.strokeWeight(10 * this._p5.scale); buf.noFill();
-    buf.arc(rounding, h - rounding, rounding*2.5, rounding*2.5, this._p5.HALF_PI - 0.01, this._p5.PI + 0.01);
+    // buf.stroke(this.style.lining); buf.strokeWeight(sw / 3);
+    // let line_step = 5;// + rackrand() * 3;
+    // let x1 = 0;
+    // while (x1 < w + h) {
+    //   x1 += line_step;
+    //   buf.line(x1, 0, 0, x1);
+    // }
+    // buf.stroke(255); buf.strokeWeight(10 * buf.scale); buf.noFill();
+    // buf.arc(rounding, h - rounding, rounding*2.5, rounding*2.5, buf.HALF_PI - 0.01, buf.PI + 0.01);
 
     buf.fill(50);
     let displ = 0.5;
@@ -778,15 +920,15 @@ class Module extends GraphicObject {
 
     if (this.name.length > 0) {
       sw = 1;
-      buf.stroke(30); buf.strokeWeight(sw); buf.fill(255);
-      buf.rect(w / 6, 5, w - w / 3, 20);
+      buf.stroke(30); buf.strokeWeight(sw); buf.noFill();
+      //buf.rect(w / 6, 5, w - w / 3, 20, 10);
 
       sw = 0.1;
-      buf.textSize(15);
+      buf.textSize(15 * engine.scale / 2.922569722890493);
       buf.fill(60);
-      buf.textAlign(this._p5.CENTER, this._p5.CENTER);
+      buf.textAlign(buf.CENTER, buf.CENTER);
       buf.strokeWeight(sw);
-      buf.text(this.name.substring(0, Math.floor((w - w / 3) / this._p5.textWidth(this.name) * this.name.length * 0.7)), w / 2, 15);
+      buf.text(this.name.substring(0, Math.floor((w - w / 3) / buf.textWidth(this.name) * this.name.length * 0.7)), w / 2, 15);
     }
 
     sw = 1.5;
@@ -824,18 +966,18 @@ class Module extends GraphicObject {
   }
 
   mouse_dragged(x, y, dx, dy) {
-    this._x = Math.floor((x - engine.x / engine.scale - engine.spacing - this._xd) / 5.08);
-    this._x = this._x * 5.08 + engine.x / engine.scale + engine.spacing;
-    this._y = Math.floor((y - engine.y / engine.scale - engine.module0.h - 2*engine.spacing) / engine.row_height);
-    this._y = this._y * engine.row_height + engine.y / engine.scale + engine.module0.h + 2*engine.spacing;
+    // this._x = Math.floor((x - engine.x / engine.scale - engine.spacing - this._xd) / 5.08);
+    // this._x = this._x * 5.08 + engine.x / engine.scale + engine.spacing;
+    // this._y = Math.floor((y - engine.y / engine.scale - engine.module0.h - 2*engine.spacing) / engine.row_height);
+    // this._y = this._y * engine.row_height + engine.y / engine.scale + engine.module0.h + 2*engine.spacing;
 
-    this._xy = engine.closest_place(this, this._x, this._y, engine.modules);
-    if (this._xy != null) {
-      this.x = this._xy[0];
-      this.y = this._xy[1];
-      engine.update_width();
-      engine.changed=true;
-    }
+    // this._xy = engine.closest_place(this, this._x, this._y, engine.modules);
+    // if (this._xy != null) {
+    //   this.x = this._xy[0];
+    //   this.y = this._xy[1];
+    //   engine.update_width();
+    //   engine.changed=true;
+    // }
   }
 
   mouse_released(x, y, dx, dy) { 
@@ -874,6 +1016,10 @@ class Module0 extends Module {
 
     this.L = 0;
     this.R = 0;
+
+    this.style = new ModuleStyle();
+
+    this.hash = ''
   }
 
   draw_cbf(buf, w, h) {
@@ -882,12 +1028,12 @@ class Module0 extends Module {
     // buf.stroke(60); buf.strokeWeight(sw); buf.fill(255);
     // buf.rect(sw + w * 0.2, sw + h * 0.63, w * 0.6 - 2 * sw, h * 0.038 - 2 * sw);
 
-    // sw = 0.1;
-    // buf.textSize(w * 0.18);
-    // buf.fill(60);
-    // buf.textAlign(this._p5.CENTER, this._p5.CENTER);
-    // buf.strokeWeight(sw);
-    // buf.text('LVLS', w / 2, sw*2 + h * 0.63 + h * 0.04 / 2);
+    let sw = 0.1;
+    buf.textSize(h / 2);
+    buf.fill(60);
+    buf.textAlign(buf.CENTER, buf.CENTER);
+    buf.strokeWeight(sw);
+    buf.text('MetaRack', w / 2, h / 2);
   }
 
   draw_dbf(buf, x, y, w, h) {
@@ -907,7 +1053,7 @@ class Module0 extends Module {
     super.set_size(w, h);
     if (this.i) {
       this.i['LEFT'].set_position(this.w - 30, this.h / 12);
-      this.i['RIGHT'].set_position(this.w - 15, this.h / 12);
+      this.i['RIGHT'].set_position(this.w - 17.5, this.h / 12);
     }
   }
 
@@ -927,9 +1073,8 @@ class Module0 extends Module {
 // ENGINE
 
 class Engine extends GraphicObject {
-  constructor({_p5=rackp5, w=rackwidth, h=rackheight, visible=true}={}) {
-    super({_p5:_p5, w:w, h:h, visible:visible});
-    this._p5 = _p5;
+  constructor({w=rackwidth, h=rackheight, visible=true}={}) {
+    super({w:w, h:h, visible:visible});
     this.module_registry = {};
     this.module_keys = [];
 
@@ -964,11 +1109,14 @@ class Engine extends GraphicObject {
     this.reinit_patch();
     this.reinit_view();
     this.reinit_iterators();
+    this.time = 0;
   }
 
   reinit_patch() {
     this.modules = [];
+    this.gchildren = [];
     this.module_index = {0: this.module0};
+    this.attach(this.module0);
     this.wires = [];
     this.rows = 2;
     this.rack_max_width = 0;
@@ -1003,10 +1151,10 @@ class Engine extends GraphicObject {
   draw(x, y) {
     if (!this.visible) return;
     this.ax = x; this.ay = y;
-    if (!this.cbf) this.cbf = this._p5.createGraphics(this.w, this.h);
-    if (!this.sbf) this.sbf = this._p5.createGraphics(this.w, this.h);
-    if (!this.dbf) this.dbf = this._p5.createGraphics(this.w, this.h);
-    if (!this.wbf) this.wbf = this._p5.createGraphics(this.w, this.h);
+    if (!this.cbf) this.cbf = createGraphics(this.w, this.h);
+    if (!this.sbf) this.sbf = createGraphics(this.w, this.h);
+    if (!this.dbf) this.dbf = createGraphics(this.w, this.h);
+    if (!this.wbf) this.wbf = createGraphics(this.w, this.h);
     
     if (this.changed || this.wbf_changed) { this.wbf.clear(); }
     
@@ -1043,13 +1191,13 @@ class Engine extends GraphicObject {
       for (this.i_draw = 0; this.i_draw < this.wires.length; this.i_draw ++) 
         this.wires[this.i_draw].draw(this.wbf, this.x / this.scale, this.y / this.scale);
     this.cbf.pop(); this.sbf.pop(); this.dbf.pop(); this.wbf.pop();
-    this._p5.image(this.cbf, x, y, this.w, this.h);
-    this._p5.image(this.sbf, x, y, this.w, this.h);
-    this._p5.image(this.dbf, x, y, this.w, this.h);
-    this._p5.image(this.wbf, x, y, this.w, this.h);
-    const sw = 3; this._p5.stroke(60); this._p5.strokeWeight(sw); this._p5.noFill(); this._p5.rect(x + sw / 2, y + sw / 2, this.w - sw, this.h - sw);
+    image(this.cbf, x, y, this.w, this.h);
+    image(this.sbf, x, y, this.w, this.h);
+    image(this.dbf, x, y, this.w, this.h);
+    image(this.wbf, x, y, this.w, this.h);
+    const sw = 3; stroke(60); strokeWeight(sw); noFill(); rect(x + sw / 2, y + sw / 2, this.w - sw, this.h - sw);
     this.changed = false;
-    this.wbf_changed = false;
+    //this.wbf_changed = false;
   }
 
   update_width() {
@@ -1072,7 +1220,9 @@ class Engine extends GraphicObject {
     this.undo_checkpoint();
   }
 
+
   add_wire(w) { 
+    //w.style.core=[198, 70, 15, 255];
     this.wires.push(w); 
     this.wbf_changed = true;
   }
@@ -1146,6 +1296,7 @@ class Engine extends GraphicObject {
   find_wire(w, wires=this.wires) {
     let i = 0;
     while (i < wires.length) {
+      // console.log(wires[i])
       if (wires[i].a.mid === w.a.mid && wires[i].b.mid === w.b.mid && 
           wires[i].a.pid === w.a.pid && wires[i].b.pid === w.b.pid){
         return wires[i];
@@ -1164,8 +1315,6 @@ class Engine extends GraphicObject {
 
   set_size(w, h) {
     super.set_size(w, h);
-    this.rows = Math.floor(h / window.devicePixelRatio / 200);
-    if (this.rows < 1) this.rows = 1;
     if (this.modules) this.replace_modules();
     this.reinit_view();
     if (this.module0) 
@@ -1340,6 +1489,11 @@ class Engine extends GraphicObject {
   }
 
   load_state(s) {
+    this.stop = true;
+    this.clear_state();
+
+    rackrand = sfc32(...hashes);
+
     let module_index = {'0': this.module0};
 
     for (const m in s['modules']) {
@@ -1351,6 +1505,7 @@ class Engine extends GraphicObject {
         console.error(error);
       }
     } 
+    // console.log(s['wires']);
     for (const w of s['wires']) { 
       try {
         module_index[w.a.mid].o[w.a.pid].connect(module_index[w.b.mid].i[w.b.pid]); 
@@ -1360,6 +1515,7 @@ class Engine extends GraphicObject {
       }
     }
     this.undo_checkpoint();
+    this.stop = false;
   }
 
   set_save_endpoint(url) {
@@ -1378,36 +1534,36 @@ function metamodule(m) {
 // ADDITIONAL_METHODS
 
 let audioContext;
-engine = new Engine({_p5:rackp5, w:10, h:10, visible:false});
+engine = new Engine({w:10, h:10, visible:false});
 
-rackp5.mousePressed = (event) => {
-  if (rackp5.mouseX > engine.ax && rackp5.mouseX < engine.ax + engine.w && rackp5.mouseY > engine.ay && rackp5.mouseY < engine.ay + engine.h) {
-    if (rackp5.mouseButton == rackp5.LEFT) engine.mouse_pressed(rackp5.mouseX - engine.ax, rackp5.mouseY - engine.ay, rackp5.movedX, rackp5.movedY);
-    if (rackp5.mouseButton == rackp5.RIGHT) console.log('prop');
+function mousePressed() {
+  if (mouseX > engine.ax && mouseX < engine.ax + engine.w && mouseY > engine.ay && mouseY < engine.ay + engine.h) {
+    if (mouseButton == LEFT) engine.mouse_pressed(mouseX - engine.ax, mouseY - engine.ay, movedX, movedY);
+    if (mouseButton == RIGHT) console.log('prop');
   }
 }
 
-rackp5.mouseDragged = () => {
-  engine.mouse_dragged(rackp5.mouseX - engine.ax, rackp5.mouseY - engine.ay, rackp5.movedX, rackp5.movedY);
+function mouseDragged() {
+  engine.mouse_dragged(mouseX - engine.ax, mouseY - engine.ay, movedX, movedY);
 }
 
-rackp5.mouseReleased = () => {
-  engine.mouse_released(rackp5.mouseX - engine.ax, rackp5.mouseY - engine.ay, rackp5.movedX, rackp5.movedY);
+function mouseReleased() {
+  engine.mouse_released(mouseX - engine.ax, mouseY - engine.ay, movedX, movedY);
 }
 
-rackp5.doubleClicked = () => {
-  engine.double_clicked(rackp5.mouseX - engine.ax, rackp5.mouseY - engine.ay, rackp5.movedX, rackp5.movedY);
+function doubleClicked() {
+  engine.double_clicked(mouseX - engine.ax, mouseY - engine.ay, movedX, movedY);
 }
 
-rackp5.mouseWheel = (event) => {
+function mouseWheel() {
   engine.set_offset(engine.x - event.deltaX / 5, 0);
 }
 
-rackp5.keyPressed = () => {
-  if (rackp5.keyCode === 91) {
+function keyPressed() {
+  if (keyCode === 16) {
     engine.cmdpressed = true;
   }
-  if (rackp5.keyCode === 83) {
+  if (keyCode === 83) {
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([JSON.stringify(engine.save_state())], {
       type: "text/plain"
@@ -1419,7 +1575,7 @@ rackp5.keyPressed = () => {
     // engine.save_state();
   }
 
-  if (rackp5.keyCode === 76) {
+  if (keyCode === 76) {
     var input = document.createElement('input');
     input.type = 'file';
     input.onchange = e => { 
@@ -1439,37 +1595,96 @@ rackp5.keyPressed = () => {
     input.click();
   }
 
-  if (rackp5.keyCode === 67) {
-    engine.clear_state();
-  }
+  // if (keyCode === 67) {
+  //   engine.clear_state();
+  // }
 
-  if (rackp5.keyCode === 85) {
-    engine.undo_last_action();
-  }
+  // if (keyCode === 85) {
+  //   engine.undo_last_action();
+  // }
 
-  if (rackp5.keyCode === 8) {
-    engine.delete_last_module();
-  }
+  // if (keyCode === 8) {
+  //   engine.delete_last_module();
+  // }
 
-  if (rackp5.keyCode === 70) {
+  if (keyCode === 70) {
     document.body.requestFullscreen();
   }
 }
 
-rackp5.keyReleased = () => {
-  if (rackp5.keyCode === 91) {
+// document.addEventListener('fullscreenchange', (event) => { 
+
+//   setTimeout(function () {
+//     rackwidth = document.documentElement.clientWidth;
+//     rackheight = document.documentElement.clientHeight;
+//     console.log(rackwidth, rackheight)
+//     resizeCanvas(rackwidth, rackheight);
+//     // cnv.position(50, 100);
+//     // engine.gchildren.forEach(element => {
+//     //   element.y += 2;
+//     // });
+
+//     //engine.y += hp2y(2);
+//     //engine.replace_modules();
+//     // engine.set_size(rackwidth, rackheight);
+
+//     engine.changed = true;
+
+//     engine.replace_modules();
+
+//     let max = 0;
+
+//     engine.gchildren.forEach(element => {
+//       if (element.name.length > 0) {
+//         if ((element.x + element.w) > max) {
+//           max = element.x + element.w;
+//         }
+//       }
+//     });
+
+//     engine.gchildren[0].set_size(max - 1, engine.gchildren[0].h)
+//     engine.w = (max + 1) * engine.scale;
+
+//     // console.log(engine.gchildren[0].x, engine.gchildren[0].y)
+
+//     aspect = engine.w / rackwidth;
+
+//     if (aspect > 1) {
+//       engine.set_size(pw, engine.h / aspect);
+//       engine.replace_modules();
+
+//       max = 0;
+
+//       engine.gchildren.forEach(element => {
+//         if (element.name.length > 0) {
+//           if ((element.x + element.w) > max) {
+//             max = element.x + element.w;
+//           }
+//         }
+//       });
+
+//       engine.gchildren[0].set_size(max - 1, engine.gchildren[0].h)
+//     } 
+    
+//   }, 550);
+  
+// });
+
+function keyReleased() {
+  if (keyCode === 16) {
     engine.cmdpressed = false;
   }
 }
 
-rackp5.windowResized = () => {
-  engine.stop = true;
-  rackwidth = document.documentElement.clientWidth;
-  rackheight = document.documentElement.clientHeight - 20;
-  rackp5.resizeCanvas(rackwidth, rackheight);
-  engine.set_size(rackwidth, rackheight);
-  engine.stop = false;
-}
+// function windowResized() {
+//   engine.stop = true;
+//   rackwidth = document.documentElement.clientWidth;
+//   rackheight = document.documentElement.clientHeight;
+//   resizeCanvas(rackwidth, rackheight);
+//   //engine.set_size(rackwidth * 0.8, rackheight * 0.8);
+//   engine.set_size((pw - engine.w)/2, ph);
+//   engine.stop = false;
+// }
 
 function engine_run() {
   audioContext = new AudioContext();
@@ -1481,9 +1696,10 @@ function engine_run() {
     let outputL = outputBuffer.getChannelData(0);
     let outputR = outputBuffer.getChannelData(1);
     for (let sample = 0; sample < outputL.length; sample++) {
-      engine.process();
-      outputL[sample] = engine.module0.L;
-      outputR[sample] = engine.module0.R;
+      if (engine.stop == false) engine.process();
+      outputL[sample] = engine.module0.L * engine.time ** 2;
+      outputR[sample] = engine.module0.R * engine.time ** 2;
+      if ((engine.stop == false) && (engine.time < 1)) engine.time += 1e-5;
     }
   }
 

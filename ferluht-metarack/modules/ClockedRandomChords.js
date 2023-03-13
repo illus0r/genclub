@@ -95,7 +95,8 @@ class ClockedRandomChordsWasm extends Module {
 class ClockedRandomChords extends Module {
   constructor(_p5=rackp5) {
     super({w:hp2x(10)});
-    this._p5 = _p5;
+    buf = _p5;
+    console.log('ke')
     this.add_input(new InputEncoder({x:hp2x(0.7), y:hp2y(0.55), r:hp2x(1), vmin:0, vmax:10, val:1, name:'A'}));
     this.add_input(new InputEncoder({x:hp2x(2.9), y:hp2y(0.55), r:hp2x(1), vmin:0, vmax:10, val:1, name:'D'}));
     this.add_input(new InputEncoder({x:hp2x(5.1), y:hp2y(0.55), r:hp2x(1), vmin:0, vmax:1, val:0.1, name:'S'}));
@@ -149,11 +150,27 @@ class ClockedRandomChords extends Module {
     this.proc_i = 0;
   }
 
+  randomize() {
+    this.i['SHPR'].set(Math.random() * 4);
+    this.i['ROOT'].set(Math.random() * 11);
+    this.i['SCL'].set(Math.random() * 8);
+    this.i['OFST'].set((Math.random()) * (-2));
+    this.i['WDTH'].set(Math.random() * 2.9 + 0.1);
+
+    this.i['A'].set(Math.random() * 10);
+    this.i['D'].set(Math.random() * 10);
+    this.i['S'].set(Math.random());
+    this.i['R'].set(Math.random() * 50);
+    this.i['P1'].set(Math.random());
+    this.i['P2'].set(Math.random());
+    this.i['P3'].set(Math.random());
+  }
+
   update_params() {
     this.gate = this.i['GATE'].get();
     this.shape = this.i['SHPR'].get();
-    this.root = this.i['ROOT'].get().toFixed(0);
-    this.scale = this.i['SCL'].get().toFixed(0);
+    this.root = Math.round(this.i['ROOT'].get());
+    this.scale = Math.round(this.i['SCL'].get());
     this.offset = this.i['OFST'].get();
     this.width = this.i['WDTH'].get();
 
@@ -181,7 +198,7 @@ class ClockedRandomChords extends Module {
     super.draw_cbf(buf, w, h);
     let sw = 5;
     let rounding = 5; 
-    buf.stroke(60); buf.strokeWeight(sw); buf.strokeJoin(this._p5.ROUND); buf.fill(255);
+    buf.stroke(60); buf.strokeWeight(sw); buf.strokeJoin(buf.ROUND); buf.fill(255);
     buf.rect(sw / 2 + w * 0.05, sw / 2 + h * 0.05, w * 0.9 - sw, h * 0.3 - sw, rounding, rounding, rounding, rounding);
 
     buf.stroke(60);
