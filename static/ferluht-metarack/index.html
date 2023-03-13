@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<style type="text/css">
+  html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+  }
+</style>
+<html>
+  <head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.3/gh-fork-ribbon.min.css" />
+    <meta charset="UTF-8">
+    <title>MetaRack</title>
+    <script id="fxhash-snippet">
+      //---- do not edit the following code (you can indent as you wish)
+      let alphabet = "123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
+      var fxhash = "oo" + Array(49).fill(0).map(_=>alphabet[(Math.random()*alphabet.length)|0]).join('')
+      // fxhash = 'ooouBoeiL8NadduErhyNjqwXGpukJvssnHQbpwmLhH41uZy7Ace'
+      let b58dec = str=>[...str].reduce((p,c)=>p*alphabet.length+alphabet.indexOf(c)|0, 0)
+      let fxhashTrunc = fxhash.slice(2)
+      let regex = new RegExp(".{" + ((fxhash.length/4)|0) + "}", 'g')
+      let hashes = fxhashTrunc.match(regex).map(h => b58dec(h))
+      let sfc32 = (a, b, c, d) => {
+        return () => {
+          a |= 0; b |= 0; c |= 0; d |= 0
+          var t = (a + b | 0) + d | 0
+          d = d + 1 | 0
+          a = b ^ b >>> 9
+          b = c + (c << 3) | 0
+          c = c << 21 | c >>> 11
+          c = c + t | 0
+          return (t >>> 0) / 4294967296
+        }
+      }
+      var fxrand = sfc32(...hashes)
+      // call this method to trigger the preview
+      function fxpreview() {
+        console.log("fxhash: TRIGGER PREVIEW")
+      }
+      //---- /do not edit the following code
+    </script>
+    <!-- if you need to import js scripts do it here -->
+    <script language="javascript" type="text/javascript" src="./lib/p5.js"></script>
+
+  </head>
+  <body>
+
+    <script language="javascript" type="text/javascript" src="./core/cryptorack_core.js"></script>
+
+    <script language="javascript" type="text/javascript" src="./primitives/CreateModule.js"></script>
+    <script language="javascript" type="text/javascript" src="./primitives/ReverbPrim.js"></script>
+    <script language="javascript" type="text/javascript" src="./primitives/ChorusPrim.js"></script>
+    <script language="javascript" type="text/javascript" src="./primitives/DelayWasmPrim.js"></script>
+    <script language="javascript" type="text/javascript" src="./primitives/RawScope.js"></script>
+    <script language="javascript" type="text/javascript" src="./primitives/RawScopeDouble.js"></script>
+    <script language="javascript" type="text/javascript" src="./primitives/BernoulliGatePrim.js"></script>
+    <script language="javascript" type="text/javascript" src="./primitives/ScalePrim.js"></script>
+    <script language="javascript" type="text/javascript" src="./primitives/SmoothCrossFade.js"></script>
+    <script language="javascript" type="text/javascript" src="./primitives/CombFilterPrim.js"></script>
+    <script language="javascript" type="text/javascript" src="./primitives/RingPrim.js"></script>
+    <script language="javascript" type="text/javascript" src="./primitives/SaturnPrim.js"></script>
+    <script language="javascript" type="text/javascript" src="./primitives/SampleDelay.js"></script>
+    <script language="javascript" type="text/javascript" src="./primitives/DelayPrim.js"></script>
+    <script language="javascript" type="text/javascript" src="./primitives/VCOPrim.js"></script>
+    <script language="javascript" type="text/javascript" src="./primitives/ADSRPrim.js"></script>
+    <script language="javascript" type="text/javascript" src="./primitives/VCAPrim.js"></script>
+    <script language="javascript" type="text/javascript" src="./primitives/NoisePrim.js"></script>
+    <script language="javascript" type="text/javascript" src="./primitives/LevelDisplay.js"></script>
+    <script language="javascript" type="text/javascript" src="./primitives/InterpDelay.js"></script>
+    <script language="javascript" type="text/javascript" src="./primitives/AllPassFilter.js"></script>
+    <script language="javascript" type="text/javascript" src="./primitives/OnePoleFilters.js"></script>
+    <script language="javascript" type="text/javascript" src="./primitives/DattorroReverb.js"></script>
+    <script language="javascript" type="text/javascript" src="./primitives/DelayLine.js"></script>
+    <script language="javascript" type="text/javascript" src="./primitives/TextSetDisplay.js"></script>
+    <script language="javascript" type="text/javascript" src="./primitives/LadderFilter.js"></script>
+    <script language="javascript" type="text/javascript" src="./primitives/TextDisplay.js"></script>
+    <script language="javascript" type="text/javascript" src="./primitives/SampleAndHoldPrim.js"></script>
+    
+    <script language="javascript" type="text/javascript" src="./modules/Info.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/VCO.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/RandomScale.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/RandomNoise.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/RandomFX.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/RandomLead.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/ReverbWasm.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/ClockedRandomChords.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/RandomGenerator.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/PingPong.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/Ring.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/Burst.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/ByteBeat.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/CombFilter.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/Saturation.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/Juno.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/Chorus.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/SVCO.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/Offset.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/Octave.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/Kick.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/Hat.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/Clock.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/GateSequencer.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/ADSR.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/VCA.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/SH.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/Noise.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/Delay.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/Reverb.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/Scale.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/Mixer.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/Sequencer.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/Filter.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/BernoulliGate.js"></script>
+    <script language="javascript" type="text/javascript" src="./modules/Scope.js"></script>
+
+
+    <script language="javascript" type="text/javascript" src="./index.js"></script>
+
+    <script type="text/javascript">
+
+      function fn_onclick() {
+        if(!audioContext) {
+          engine_run();
+        }
+      }
+
+      document.body.addEventListener('click', fn_onclick, true); 
+      let space_running = false;
+
+      document.body.onkeyup = function(e) {
+        if (e.key == " " ||
+            e.code == "Space" ||      
+            e.keyCode == 32      
+        ) {
+          if (space_running) return;
+          space_running = true;
+          
+          if(audioContext) {
+            audioContext.close();
+          }
+
+          let alphabet = "123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
+          var fxhash = "oo" + Array(49).fill(0).map(_=>alphabet[(Math.random()*alphabet.length)|0]).join('')
+          // fxhash = 'ooouBoeiL8NadduErhyNjqwXGpukJvssnHQbpwmLhH41uZy7Ace'
+          let b58dec = str=>[...str].reduce((p,c)=>p*alphabet.length+alphabet.indexOf(c)|0, 0)
+          let fxhashTrunc = fxhash.slice(2)
+          let regex = new RegExp(".{" + ((fxhash.length/4)|0) + "}", 'g')
+          hashes = fxhashTrunc.match(regex).map(h => b58dec(h))
+          
+          engine.stop = true;
+          engine.time = 0;
+
+          // engine.reinit();
+          choose_colors();
+
+          engine.module0.style = new ModuleStyle();
+          init_all(engine);
+
+          engine.stop = false;
+
+          engine_run();
+          space_running = false;
+        }
+      }
+
+    init_all(engine);
+
+    </script>
+
+  </body>
+</html>

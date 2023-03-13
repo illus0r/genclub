@@ -62,10 +62,15 @@ export default function Home() {
   `);
   const artworks = data.allGoogle1Sheet.nodes;
 
+  function setNewArtwork() {
+    setArtwork(artworks[Math.floor(Math.random() * artworks.length)])
+  }
+
   function hadleWorkClick(e) {
     e.preventDefault();
 
-    setArtwork(artworks[Math.floor(Math.random() * artworks.length)]);
+    setNewArtwork();
+    if (!artwork.artworkUrl || !artwork.artworkPath) setNewArtwork();
     window.gtag && window.gtag("event", "genclub button click", {
       artwork: `${artwork.name} - ${artwork.artworkTitle}`,
       artist: `${artwork.name}`,
@@ -83,7 +88,7 @@ export default function Home() {
   }
 
   useLayoutEffect(() => {
-    setArtwork(artworks[Math.floor(Math.random() * artworks.length)]);
+    setNewArtwork();
   }, []);
 
   useEffect(() => {
