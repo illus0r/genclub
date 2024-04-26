@@ -192,7 +192,7 @@ export default function Home() {
             <LinkConstruct link="wiki.genclub.club" title="wiki" />
             {" / "}
             <LinkConstruct
-              link="https://course.genclub.club/"
+              link="https://setka.design/?utm_campaign=index.html&utm_source=genclub.club&utm_medium=website"
               title="набор на новый курс"
             />
           </div>
